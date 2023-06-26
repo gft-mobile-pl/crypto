@@ -9,9 +9,9 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/crypto-domain" />
             <option value="$PROJECT_DIR$/crypto-framework" />
+            <option value="$PROJECT_DIR$/test-app" />
           </set>
         </option>
       </GradleProjectSettings>

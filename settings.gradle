@@ -13,6 +13,6 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "crypto-library"
-include ':app'
+include ':test-app'
 include ':crypto-domain'
 include ':crypto-framework'

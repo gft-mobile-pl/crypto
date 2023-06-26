@@ -3,6 +3,7 @@ package com.gft.crypto.domain.model
 import kotlin.time.Duration
 
 data class KeyProperties(
+    val purposes: Set<KeyPurpose>,
     val algorithm: KeyAlgorithm,
     val unlockRequired: Boolean,
     val userAuthenticationPolicy: UserAuthenticationPolicy,
@@ -38,6 +39,7 @@ enum class EncryptionPadding {
 }
 
 enum class SignaturePadding {
+    NONE,
     RSA_PKCS1,
     RSA_PSS,
 }
@@ -48,6 +50,7 @@ enum class KeyAlgorithm {
 }
 
 enum class BlockMode {
+    UNDEFINED,
     ECB,
     CBC,
     CTR,

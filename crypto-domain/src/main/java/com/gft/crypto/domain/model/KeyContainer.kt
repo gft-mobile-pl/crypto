@@ -2,7 +2,7 @@ package com.gft.crypto.domain.model
 
 import java.security.Key
 
-class KeyContainer<T : KeyPurpose>(
+class KeyContainer(
     key: Key,
-    keyPurpose: KeyPurpose
+    keyPurposes: Set<KeyPurpose>
 )
