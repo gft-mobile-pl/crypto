@@ -1,4 +1,4 @@
-package com.gft.crypto.domain.model
+package com.gft.crypto.domain.keys.model
 
 sealed interface KeyPurpose {
     object Encryption : KeyPurpose

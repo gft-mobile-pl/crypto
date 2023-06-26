@@ -1,7 +1,7 @@
-package com.gft.crypto.domain.repositories
+package com.gft.crypto.domain.keys.repositories
 
-import com.gft.crypto.domain.model.KeyContainer
-import com.gft.crypto.domain.model.KeyUsageScope
+import com.gft.crypto.domain.keys.model.KeyContainer
+import com.gft.crypto.domain.keys.model.KeyUsageScope
 
 interface KeysRepository<T : KeyUsageScope> {
     fun <R : T> createKey(alias: String, keyUsageScope: R)
