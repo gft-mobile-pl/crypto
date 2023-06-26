@@ -6,5 +6,4 @@ sealed interface KeyPurpose {
     object Signing : KeyPurpose
     object SignatureVerification : KeyPurpose
     object Wrapping : KeyPurpose
-    object Unwrapping : KeyPurpose
 }

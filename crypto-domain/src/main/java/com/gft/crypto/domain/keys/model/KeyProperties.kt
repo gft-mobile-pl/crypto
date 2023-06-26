@@ -5,9 +5,10 @@ import kotlin.time.Duration
 data class KeyProperties(
     val purposes: Set<KeyPurpose>,
     val algorithm: KeyAlgorithm,
-    val unlockRequired: Boolean,
+    val keySize: Int,
+    val unlockPolicy: UnlockPolicy,
     val userAuthenticationPolicy: UserAuthenticationPolicy,
-    val digests: Set<Digests>,
+    val digests: Set<Digest>,
     val encryptionPaddings: Set<EncryptionPadding>,
     val signaturePaddings: Set<SignaturePadding>,
     val blockModes: Set<BlockMode>
@@ -15,17 +16,18 @@ data class KeyProperties(
 
 sealed interface UserAuthenticationPolicy {
     object NotRequired : UserAuthenticationPolicy
-    data class RequiredAfterBoot(val authenticationStrength: UserAuthenticationStrength) : UserAuthenticationPolicy
-    data class RequiredOnEachUse(val authenticationStrength: UserAuthenticationStrength) : UserAuthenticationPolicy
-    data class Required(val authenticationStrength: UserAuthenticationStrength, val timeout: Duration) : UserAuthenticationPolicy
+    object RequiredAfterBoot : UserAuthenticationPolicy
+    object BiometricAuthenticationRequiredOnEachUse : UserAuthenticationPolicy
+    data class Required(val timeout: Duration) : UserAuthenticationPolicy
 }
 
-sealed interface UserAuthenticationStrength {
-    object Weak : UserAuthenticationStrength
-    object Strong : UserAuthenticationStrength
+sealed interface UnlockPolicy {
+    object Required : UnlockPolicy
+    object NotRequired : UnlockPolicy
+    object Unknown : UnlockPolicy
 }
 
-enum class Digests {
+enum class Digest {
     SHA_256,
     SHA_384,
     SHA_512
@@ -39,7 +41,6 @@ enum class EncryptionPadding {
 }
 
 enum class SignaturePadding {
-    NONE,
     RSA_PKCS1,
     RSA_PSS,
 }
@@ -50,7 +51,6 @@ enum class KeyAlgorithm {
 }
 
 enum class BlockMode {
-    UNDEFINED,
     ECB,
     CBC,
     CTR,
