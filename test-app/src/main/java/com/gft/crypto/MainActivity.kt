@@ -11,6 +11,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.gft.crypto.ui.theme.CryptolibraryTheme
+import java.security.KeyStore
+
+private val keyStore = KeyStore.getInstance("AndroidKeyStore").apply {
+    load(null)
+}
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,5 +25,7 @@ class MainActivity : ComponentActivity() {
 
             }
         }
+
+        println("#Test keyStore = $keyStore")
     }
 }
