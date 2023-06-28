@@ -1,13 +1,13 @@
 package com.gft.crypto.framework.keys.services
 
 import android.security.keystore.KeyInfo
-import com.gft.crypto.domain.keys.model.BlockMode
-import com.gft.crypto.domain.keys.model.Digest
-import com.gft.crypto.domain.keys.model.EncryptionPadding
-import com.gft.crypto.domain.keys.model.KeyAlgorithm
+import com.gft.crypto.domain.common.model.BlockMode
+import com.gft.crypto.domain.common.model.Digest
+import com.gft.crypto.domain.common.model.EncryptionPadding
+import com.gft.crypto.domain.common.model.Algorithm
 import com.gft.crypto.domain.keys.model.KeyProperties
 import com.gft.crypto.domain.keys.model.KeyPurpose
-import com.gft.crypto.domain.keys.model.SignaturePadding
+import com.gft.crypto.domain.common.model.SignaturePadding
 import com.gft.crypto.domain.keys.model.UnlockPolicy
 import com.gft.crypto.domain.keys.model.UserAuthenticationPolicy
 import com.gft.crypto.domain.keys.services.KeyPropertiesExtractor
@@ -111,8 +111,8 @@ private fun Int.toKeyPurposes(): Set<KeyPurpose> {
 }
 
 private fun String.toKeyAlgorithm() = when (this) {
-    android.security.keystore.KeyProperties.KEY_ALGORITHM_AES -> KeyAlgorithm.AES
-    android.security.keystore.KeyProperties.KEY_ALGORITHM_RSA -> KeyAlgorithm.RSA
+    android.security.keystore.KeyProperties.KEY_ALGORITHM_AES -> Algorithm.AES
+    android.security.keystore.KeyProperties.KEY_ALGORITHM_RSA -> Algorithm.RSA
     else -> throw IllegalArgumentException("$this algorithm is not a supported.")
 }
 

@@ -1,12 +1,12 @@
 package com.gft.crypto.framework.keys.utils
 
 import android.security.keystore.KeyProperties
-import com.gft.crypto.domain.keys.model.BlockMode
-import com.gft.crypto.domain.keys.model.Digest
-import com.gft.crypto.domain.keys.model.EncryptionPadding
-import com.gft.crypto.domain.keys.model.KeyAlgorithm
+import com.gft.crypto.domain.common.model.BlockMode
+import com.gft.crypto.domain.common.model.Digest
+import com.gft.crypto.domain.common.model.EncryptionPadding
+import com.gft.crypto.domain.common.model.Algorithm
 import com.gft.crypto.domain.keys.model.KeyPurpose
-import com.gft.crypto.domain.keys.model.SignaturePadding
+import com.gft.crypto.domain.common.model.SignaturePadding
 import com.gft.crypto.domain.keys.model.UnlockPolicy
 
 internal fun BlockMode.toNativeBlockMode() = when (this) {
@@ -48,7 +48,7 @@ internal fun UnlockPolicy.toUnlockRequired() = when (this) {
     UnlockPolicy.Unknown -> throw IllegalArgumentException("UnlockPolicy.Unknown is not a valid unlock policy.")
 }
 
-internal fun KeyAlgorithm.toNativeKeyAlgorithm() = when (this) {
-    KeyAlgorithm.AES -> KeyProperties.KEY_ALGORITHM_AES
-    KeyAlgorithm.RSA -> KeyProperties.KEY_ALGORITHM_RSA
+internal fun Algorithm.toNativeKeyAlgorithm() = when (this) {
+    Algorithm.AES -> KeyProperties.KEY_ALGORITHM_AES
+    Algorithm.RSA -> KeyProperties.KEY_ALGORITHM_RSA
 }

@@ -1,7 +1,7 @@
 package com.gft.crypto.framework.keys.services
 
 import android.security.keystore.KeyProperties
-import com.gft.crypto.domain.keys.model.KeyAlgorithm
+import com.gft.crypto.domain.common.model.Algorithm
 import com.gft.crypto.domain.keys.model.KeyContainer
 import com.gft.crypto.domain.keys.model.KeyUsageScope
 import com.gft.crypto.domain.keys.services.KeyPropertiesProvider
@@ -16,7 +16,7 @@ class DefaultKeysFactory<T : KeyUsageScope>(
     override fun <R : T> generateKey(usageScope: R): Set<KeyContainer> {
         val keyProperties = keyPropertiesProvider.getKeyProperties(usageScope)
         return when (keyProperties.algorithm) {
-            KeyAlgorithm.AES -> {
+            Algorithm.AES -> {
                 KeyGenerator
                     .getInstance(KeyProperties.KEY_ALGORITHM_AES)
                     .apply {
@@ -33,7 +33,7 @@ class DefaultKeysFactory<T : KeyUsageScope>(
                     }
             }
 
-            KeyAlgorithm.RSA -> {
+            Algorithm.RSA -> {
                 KeyPairGenerator
                     .getInstance(KeyProperties.KEY_ALGORITHM_RSA)
                     .apply {

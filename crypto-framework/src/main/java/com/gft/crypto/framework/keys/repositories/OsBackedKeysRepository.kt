@@ -3,7 +3,7 @@ package com.gft.crypto.framework.keys.repositories
 import android.annotation.SuppressLint
 import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
-import com.gft.crypto.domain.keys.model.KeyAlgorithm
+import com.gft.crypto.domain.common.model.Algorithm
 import com.gft.crypto.domain.keys.model.KeyContainer
 import com.gft.crypto.domain.keys.model.KeyProperties
 import com.gft.crypto.domain.keys.model.KeyUsageScope
@@ -41,7 +41,7 @@ open class OsBackedKeysRepository<T : KeyUsageScope>(
         val keyProperties = keyPropertiesProvider.getKeyProperties(keyUsageScope)
         val keyGenParameterSpec = keyProperties.toKeyGenParameterSpec(alias)
         when (keyProperties.algorithm) {
-            KeyAlgorithm.AES -> {
+            Algorithm.AES -> {
                 KeyGenerator
                     .getInstance(NativeKeyProperties.KEY_ALGORITHM_AES, keyStore.provider.name)
                     .apply {
@@ -50,7 +50,7 @@ open class OsBackedKeysRepository<T : KeyUsageScope>(
                     .generateKey()
             }
 
-            KeyAlgorithm.RSA -> {
+            Algorithm.RSA -> {
                 KeyPairGenerator
                     .getInstance(
                         NativeKeyProperties.KEY_ALGORITHM_RSA, keyStore.provider.name
