@@ -1,8 +1,8 @@
 package com.gft.crypto.model
 
-import com.gft.crypto.domain.keys.model.KeyUsageScope
+import com.gft.crypto.domain.common.model.CryptographicScope
 
-sealed interface TestAppKeyUsagesScopes : KeyUsageScope {
+sealed interface TestAppKeyUsagesScopes : CryptographicScope {
     object EncryptingMessages : TestAppKeyUsagesScopes
     object SecuritySharedPreferences : TestAppKeyUsagesScopes
 }

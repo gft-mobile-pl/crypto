@@ -6,7 +6,7 @@ import android.security.keystore.KeyGenParameterSpec
 import com.gft.crypto.domain.common.model.Algorithm
 import com.gft.crypto.domain.keys.model.KeyContainer
 import com.gft.crypto.domain.keys.model.KeyProperties
-import com.gft.crypto.domain.keys.model.KeyUsageScope
+import com.gft.crypto.domain.common.model.CryptographicScope
 import com.gft.crypto.domain.keys.model.UserAuthenticationPolicy
 import com.gft.crypto.domain.keys.repositories.KeysRepository
 import com.gft.crypto.domain.keys.services.KeyPropertiesExtractor
@@ -25,7 +25,7 @@ import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import android.security.keystore.KeyProperties as NativeKeyProperties
 
-open class OsBackedKeysRepository<T : KeyUsageScope>(
+open class OsBackedKeysRepository<T : CryptographicScope>(
     private val keyStore: KeyStore,
     private val keyPropertiesProvider: KeyPropertiesProvider<in T>,
     private val keyPropertiesExtractor: KeyPropertiesExtractor
@@ -34,11 +34,11 @@ open class OsBackedKeysRepository<T : KeyUsageScope>(
         keyStore.assertIsAndroidKeyStore()
     }
 
-    override fun <R : T> createKey(alias: String, keyUsageScope: R) {
+    override fun <R : T> createKey(alias: String, scope: R) {
         if (containsKey(alias)) {
             throw IllegalStateException("Key with alias $alias is already registered in the repository.")
         }
-        val keyProperties = keyPropertiesProvider.getKeyProperties(keyUsageScope)
+        val keyProperties = keyPropertiesProvider.getKeyProperties(scope)
         val keyGenParameterSpec = keyProperties.toKeyGenParameterSpec(alias)
         when (keyProperties.cryptographicProperties.algorithm) {
             Algorithm.AES -> {

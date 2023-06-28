@@ -12,7 +12,7 @@ import com.gft.crypto.domain.keys.services.KeyPropertiesProvider
 import com.gft.crypto.model.TestAppKeyUsagesScopes
 
 class DefaultKeyPropertiesProvider : KeyPropertiesProvider<TestAppKeyUsagesScopes> {
-    override fun getKeyProperties(usageScope: TestAppKeyUsagesScopes): KeyProperties = when (usageScope) {
+    override fun getKeyProperties(scope: TestAppKeyUsagesScopes): KeyProperties = when (scope) {
         TestAppKeyUsagesScopes.EncryptingMessages -> KeyProperties(
             purposes = setOf(KeyPurpose.Decryption),
             keySize = 2048,

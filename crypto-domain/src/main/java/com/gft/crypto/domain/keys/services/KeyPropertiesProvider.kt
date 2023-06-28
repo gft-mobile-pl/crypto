@@ -1,8 +1,8 @@
 package com.gft.crypto.domain.keys.services
 
 import com.gft.crypto.domain.keys.model.KeyProperties
-import com.gft.crypto.domain.keys.model.KeyUsageScope
+import com.gft.crypto.domain.common.model.CryptographicScope
 
-interface KeyPropertiesProvider<T : KeyUsageScope> {
-    fun getKeyProperties(usageScope: T): KeyProperties
+interface KeyPropertiesProvider<T : CryptographicScope> {
+    fun getKeyProperties(scope: T): KeyProperties
 }
