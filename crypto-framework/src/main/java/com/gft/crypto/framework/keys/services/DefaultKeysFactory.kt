@@ -15,7 +15,7 @@ class DefaultKeysFactory<T : KeyUsageScope>(
 ) : KeysFactory<T> {
     override fun <R : T> generateKey(usageScope: R): Set<KeyContainer> {
         val keyProperties = keyPropertiesProvider.getKeyProperties(usageScope)
-        return when (keyProperties.algorithm) {
+        return when (keyProperties.cryptographicProperties.algorithm) {
             Algorithm.AES -> {
                 KeyGenerator
                     .getInstance(KeyProperties.KEY_ALGORITHM_AES)

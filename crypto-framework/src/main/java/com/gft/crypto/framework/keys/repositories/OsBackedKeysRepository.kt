@@ -40,7 +40,7 @@ open class OsBackedKeysRepository<T : KeyUsageScope>(
         }
         val keyProperties = keyPropertiesProvider.getKeyProperties(keyUsageScope)
         val keyGenParameterSpec = keyProperties.toKeyGenParameterSpec(alias)
-        when (keyProperties.algorithm) {
+        when (keyProperties.cryptographicProperties.algorithm) {
             Algorithm.AES -> {
                 KeyGenerator
                     .getInstance(NativeKeyProperties.KEY_ALGORITHM_AES, keyStore.provider.name)
@@ -114,17 +114,19 @@ private fun KeyProperties.toKeyGenParameterSpec(alias: String) = KeyGenParameter
     )
     .apply {
         setKeySize(keySize)
-        if (digests.isNotEmpty()) {
-            setDigests(*digests.map { digest -> digest.toNativeDigest() }.toTypedArray())
-        }
-        if (blockModes.isNotEmpty()) {
-            setBlockModes(*blockModes.map { blockMode -> blockMode.toNativeBlockMode() }.toTypedArray())
-        }
-        if (signaturePaddings.isNotEmpty()) {
-            setSignaturePaddings(*signaturePaddings.map { padding -> padding.toNativePadding() }.toTypedArray())
-        }
-        if (encryptionPaddings.isNotEmpty()) {
-            setEncryptionPaddings(*encryptionPaddings.map { padding -> padding.toNativePadding() }.toTypedArray())
+        with(cryptographicProperties) {
+            if (digests.isNotEmpty()) {
+                setDigests(*digests.map { digest -> digest.toNativeDigest() }.toTypedArray())
+            }
+            if (blockModes.isNotEmpty()) {
+                setBlockModes(*blockModes.map { blockMode -> blockMode.toNativeBlockMode() }.toTypedArray())
+            }
+            if (signaturePaddings.isNotEmpty()) {
+                setSignaturePaddings(*signaturePaddings.map { padding -> padding.toNativePadding() }.toTypedArray())
+            }
+            if (encryptionPaddings.isNotEmpty()) {
+                setEncryptionPaddings(*encryptionPaddings.map { padding -> padding.toNativePadding() }.toTypedArray())
+            }
         }
         when (val authenticationPolicy = userAuthenticationPolicy) {
             is UserAuthenticationPolicy.Required -> {

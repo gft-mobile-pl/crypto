@@ -1,13 +1,14 @@
 package com.gft.crypto.framework.keys.services
 
 import android.security.keystore.KeyInfo
+import com.gft.crypto.domain.common.model.Algorithm
 import com.gft.crypto.domain.common.model.BlockMode
+import com.gft.crypto.domain.common.model.CryptographicProperties
 import com.gft.crypto.domain.common.model.Digest
 import com.gft.crypto.domain.common.model.EncryptionPadding
-import com.gft.crypto.domain.common.model.Algorithm
+import com.gft.crypto.domain.common.model.SignaturePadding
 import com.gft.crypto.domain.keys.model.KeyProperties
 import com.gft.crypto.domain.keys.model.KeyPurpose
-import com.gft.crypto.domain.common.model.SignaturePadding
 import com.gft.crypto.domain.keys.model.UnlockPolicy
 import com.gft.crypto.domain.keys.model.UserAuthenticationPolicy
 import com.gft.crypto.domain.keys.services.KeyPropertiesExtractor
@@ -28,13 +29,8 @@ class DefaultKeyPropertiesExtractor(
     override fun resolveKeyProperties(key: Key) = getKeyInfo(key)
         .let { keyInfo ->
             KeyProperties(
-                algorithm = key.algorithm.toKeyAlgorithm(),
                 keySize = keyInfo.keySize,
                 purposes = keyInfo.purposes.toKeyPurposes(),
-                digests = keyInfo.digests.toDigests(),
-                signaturePaddings = keyInfo.signaturePaddings.toSignaturePaddings(),
-                encryptionPaddings = keyInfo.encryptionPaddings.toEncryptionPaddings(),
-                blockModes = keyInfo.blockModes.toBlockModes(),
                 unlockPolicy = UnlockPolicy.Unknown,
                 userAuthenticationPolicy = if (keyInfo.isUserAuthenticationRequired) {
                     when (keyInfo.userAuthenticationValidityDurationSeconds) {
@@ -44,7 +40,14 @@ class DefaultKeyPropertiesExtractor(
                     }
                 } else {
                     UserAuthenticationPolicy.NotRequired
-                }
+                },
+                cryptographicProperties = CryptographicProperties(
+                    algorithm = key.algorithm.toKeyAlgorithm(),
+                    digests = keyInfo.digests.toDigests(),
+                    signaturePaddings = keyInfo.signaturePaddings.toSignaturePaddings(),
+                    encryptionPaddings = keyInfo.encryptionPaddings.toEncryptionPaddings(),
+                    blockModes = keyInfo.blockModes.toBlockModes()
+                )
             )
         }
 
