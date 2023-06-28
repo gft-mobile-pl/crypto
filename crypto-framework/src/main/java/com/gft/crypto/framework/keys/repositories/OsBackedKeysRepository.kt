@@ -40,7 +40,7 @@ open class OsBackedKeysRepository<T : UsageScope>(
         }
         val keyProperties = keyPropertiesProvider.getKeyProperties(usageScope)
         val keyGenParameterSpec = keyProperties.toKeyGenParameterSpec(alias)
-        when (keyProperties.cryptographicProperties.algorithm) {
+        when (keyProperties.supportedOperationParams.algorithm) {
             Algorithm.AES -> {
                 KeyGenerator
                     .getInstance(NativeKeyProperties.KEY_ALGORITHM_AES, keyStore.provider.name)
@@ -114,18 +114,18 @@ private fun KeyProperties.toKeyGenParameterSpec(alias: String) = KeyGenParameter
     )
     .apply {
         setKeySize(keySize)
-        with(cryptographicProperties) {
-            if (digests.isNotEmpty()) {
-                setDigests(*digests.map { digest -> digest.toNativeDigest() }.toTypedArray())
+        with(supportedOperationParams) {
+            if (digests != null) {
+                setDigests(digests!!.toNativeDigest())
             }
-            if (blockModes.isNotEmpty()) {
-                setBlockModes(*blockModes.map { blockMode -> blockMode.toNativeBlockMode() }.toTypedArray())
+            if (blockModes != null) {
+                setBlockModes(blockModes!!.toNativeBlockMode())
             }
-            if (signaturePaddings.isNotEmpty()) {
-                setSignaturePaddings(*signaturePaddings.map { padding -> padding.toNativePadding() }.toTypedArray())
+            if (signaturePaddings != null) {
+                setSignaturePaddings(signaturePaddings!!.toNativePadding())
             }
-            if (encryptionPaddings.isNotEmpty()) {
-                setEncryptionPaddings(*encryptionPaddings.map { padding -> padding.toNativePadding() }.toTypedArray())
+            if (encryptionPaddings != null) {
+                setEncryptionPaddings(encryptionPaddings!!.toNativePadding())
             }
         }
         when (val authenticationPolicy = userAuthenticationPolicy) {

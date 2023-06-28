@@ -1,6 +1,6 @@
 package com.gft.crypto.domain.keys.model
 
-import com.gft.crypto.domain.common.model.CryptographicProperties
+import com.gft.crypto.domain.common.model.CryptographicOperationParams
 import kotlin.time.Duration
 
 data class KeyProperties(
@@ -8,7 +8,7 @@ data class KeyProperties(
     val keySize: Int,
     val unlockPolicy: UnlockPolicy,
     val userAuthenticationPolicy: UserAuthenticationPolicy,
-    val cryptographicProperties: CryptographicProperties
+    val supportedOperationParams: CryptographicOperationParams
 )
 
 sealed interface UserAuthenticationPolicy {

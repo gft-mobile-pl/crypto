@@ -2,7 +2,7 @@ package com.gft.crypto.services
 
 import com.gft.crypto.domain.common.model.Algorithm
 import com.gft.crypto.domain.common.model.BlockMode
-import com.gft.crypto.domain.common.model.CryptographicProperties
+import com.gft.crypto.domain.common.model.CryptographicOperationParams
 import com.gft.crypto.domain.common.model.EncryptionPadding
 import com.gft.crypto.domain.keys.model.KeyProperties
 import com.gft.crypto.domain.keys.model.KeyPurpose
@@ -18,12 +18,12 @@ class DefaultKeyPropertiesProvider : KeyPropertiesProvider<TestAppCryptographyUs
             keySize = 2048,
             unlockPolicy = UnlockPolicy.Required,
             userAuthenticationPolicy = UserAuthenticationPolicy.RequiredAfterBoot,
-            cryptographicProperties = CryptographicProperties(
+            supportedOperationParams = CryptographicOperationParams(
                 algorithm = Algorithm.RSA,
-                digests = emptySet(),
-                encryptionPaddings = setOf(EncryptionPadding.RSAPkcs1),
-                signaturePaddings = emptySet(),
-                blockModes = setOf(BlockMode.ECB)
+                digests = null,
+                encryptionPaddings = EncryptionPadding.RSAPkcs1,
+                signaturePaddings = null,
+                blockModes = BlockMode.ECB
             )
         )
 
@@ -32,12 +32,12 @@ class DefaultKeyPropertiesProvider : KeyPropertiesProvider<TestAppCryptographyUs
             keySize = 256,
             unlockPolicy = UnlockPolicy.Required,
             userAuthenticationPolicy = UserAuthenticationPolicy.BiometricAuthenticationRequiredOnEachUse,
-            cryptographicProperties = CryptographicProperties(
+            supportedOperationParams = CryptographicOperationParams(
                 algorithm = Algorithm.AES,
-                digests = emptySet(),
-                encryptionPaddings = setOf(EncryptionPadding.None),
-                signaturePaddings = emptySet(),
-                blockModes = setOf(BlockMode.GCM)
+                digests = null,
+                encryptionPaddings = EncryptionPadding.None,
+                signaturePaddings = null,
+                blockModes = BlockMode.GCM
             )
         )
     }

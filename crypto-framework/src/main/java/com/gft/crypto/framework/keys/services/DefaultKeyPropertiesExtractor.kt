@@ -3,7 +3,7 @@ package com.gft.crypto.framework.keys.services
 import android.security.keystore.KeyInfo
 import com.gft.crypto.domain.common.model.Algorithm
 import com.gft.crypto.domain.common.model.BlockMode
-import com.gft.crypto.domain.common.model.CryptographicProperties
+import com.gft.crypto.domain.common.model.CryptographicOperationParams
 import com.gft.crypto.domain.common.model.Digest
 import com.gft.crypto.domain.common.model.EncryptionPadding
 import com.gft.crypto.domain.common.model.SignaturePadding
@@ -41,7 +41,7 @@ class DefaultKeyPropertiesExtractor(
                 } else {
                     UserAuthenticationPolicy.NotRequired
                 },
-                cryptographicProperties = CryptographicProperties(
+                supportedOperationParams = CryptographicOperationParams(
                     algorithm = key.algorithm.toKeyAlgorithm(),
                     digests = keyInfo.digests.toDigests(),
                     signaturePaddings = keyInfo.signaturePaddings.toSignaturePaddings(),
@@ -66,7 +66,7 @@ class DefaultKeyPropertiesExtractor(
     }
 }
 
-private fun Array<String>.toBlockModes() = map { blockMode ->
+private fun Array<String>.toBlockModes() = firstOrNull()?.let { blockMode ->
     when (blockMode) {
         NativeKeyProperties.BLOCK_MODE_ECB -> BlockMode.ECB
         NativeKeyProperties.BLOCK_MODE_CBC -> BlockMode.CBC
@@ -74,9 +74,9 @@ private fun Array<String>.toBlockModes() = map { blockMode ->
         NativeKeyProperties.BLOCK_MODE_GCM -> BlockMode.GCM
         else -> throw IllegalArgumentException("$blockMode block mode is not supported.")
     }
-}.toSet()
+}
 
-private fun Array<String>.toEncryptionPaddings() = map { padding ->
+private fun Array<String>.toEncryptionPaddings() = firstOrNull()?.let { padding ->
     when (padding) {
         NativeKeyProperties.ENCRYPTION_PADDING_NONE -> EncryptionPadding.None
         NativeKeyProperties.ENCRYPTION_PADDING_PKCS7 -> EncryptionPadding.Pkcs7
@@ -84,24 +84,24 @@ private fun Array<String>.toEncryptionPaddings() = map { padding ->
         NativeKeyProperties.ENCRYPTION_PADDING_RSA_OAEP -> EncryptionPadding.RSAOaep
         else -> throw IllegalArgumentException("$padding encryption padding is not supported.")
     }
-}.toSet()
+}
 
-private fun Array<String>.toSignaturePaddings() = map { padding ->
+private fun Array<String>.toSignaturePaddings() = firstOrNull()?.let { padding ->
     when (padding) {
         NativeKeyProperties.SIGNATURE_PADDING_RSA_PKCS1 -> SignaturePadding.RSAPkcs1
         NativeKeyProperties.SIGNATURE_PADDING_RSA_PSS -> SignaturePadding.RSAPss
         else -> throw IllegalArgumentException("$padding signature padding is not supported.")
     }
-}.toSet()
+}
 
-private fun Array<String>.toDigests() = map { digest ->
+private fun Array<String>.toDigests() = firstOrNull()?.let { digest ->
     when (digest) {
         NativeKeyProperties.DIGEST_SHA256 -> Digest.SHA256
         NativeKeyProperties.DIGEST_SHA384 -> Digest.SHA384
         NativeKeyProperties.DIGEST_SHA512 -> Digest.SHA512
         else -> throw IllegalArgumentException("$digest digest is not supported.")
     }
-}.toSet()
+}
 
 private fun Int.toKeyPurposes(): Set<KeyPurpose> {
     val result = mutableSetOf<KeyPurpose>()
