@@ -79,26 +79,26 @@ private fun Array<String>.toBlockModes() = firstOrNull()?.let { blockMode ->
 private fun Array<String>.toEncryptionPaddings() = firstOrNull()?.let { padding ->
     when (padding) {
         NativeKeyProperties.ENCRYPTION_PADDING_NONE -> EncryptionPadding.None
-        NativeKeyProperties.ENCRYPTION_PADDING_PKCS7 -> EncryptionPadding.Pkcs7
-        NativeKeyProperties.ENCRYPTION_PADDING_RSA_PKCS1 -> EncryptionPadding.RSAPkcs1
-        NativeKeyProperties.ENCRYPTION_PADDING_RSA_OAEP -> EncryptionPadding.RSAOaep
+        NativeKeyProperties.ENCRYPTION_PADDING_PKCS7 -> EncryptionPadding.PKSC7
+        NativeKeyProperties.ENCRYPTION_PADDING_RSA_PKCS1 -> EncryptionPadding.RSA_PKCS1
+        NativeKeyProperties.ENCRYPTION_PADDING_RSA_OAEP -> EncryptionPadding.RSA_OAEP
         else -> throw IllegalArgumentException("$padding encryption padding is not supported.")
     }
 }
 
 private fun Array<String>.toSignaturePaddings() = firstOrNull()?.let { padding ->
     when (padding) {
-        NativeKeyProperties.SIGNATURE_PADDING_RSA_PKCS1 -> SignaturePadding.RSAPkcs1
-        NativeKeyProperties.SIGNATURE_PADDING_RSA_PSS -> SignaturePadding.RSAPss
+        NativeKeyProperties.SIGNATURE_PADDING_RSA_PKCS1 -> SignaturePadding.RSA_PKCS1
+        NativeKeyProperties.SIGNATURE_PADDING_RSA_PSS -> SignaturePadding.RSA_PSS
         else -> throw IllegalArgumentException("$padding signature padding is not supported.")
     }
 }
 
 private fun Array<String>.toDigests() = firstOrNull()?.let { digest ->
     when (digest) {
-        NativeKeyProperties.DIGEST_SHA256 -> Digest.SHA256
-        NativeKeyProperties.DIGEST_SHA384 -> Digest.SHA384
-        NativeKeyProperties.DIGEST_SHA512 -> Digest.SHA512
+        NativeKeyProperties.DIGEST_SHA256 -> Digest.SHA_256
+        NativeKeyProperties.DIGEST_SHA384 -> Digest.SHA_384
+        NativeKeyProperties.DIGEST_SHA512 -> Digest.SHA_512
         else -> throw IllegalArgumentException("$digest digest is not supported.")
     }
 }

@@ -1,8 +1,9 @@
 package com.gft.crypto.domain.common.model
 
+@Suppress("SpellCheckingInspection", "ClassName")
 sealed interface EncryptionPadding {
     object None : EncryptionPadding
-    object Pkcs7 : EncryptionPadding
-    object RSAPkcs1 : EncryptionPadding
-    object RSAOaep : EncryptionPadding
+    object PKSC7 : EncryptionPadding
+    object RSA_PKCS1 : EncryptionPadding
+    object RSA_OAEP : EncryptionPadding
 }

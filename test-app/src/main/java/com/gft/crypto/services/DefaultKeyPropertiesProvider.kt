@@ -21,7 +21,7 @@ class DefaultKeyPropertiesProvider : KeyPropertiesProvider<TestAppCryptographyUs
             supportedOperationParams = CryptographicOperationParams(
                 algorithm = Algorithm.RSA,
                 digests = null,
-                encryptionPaddings = EncryptionPadding.RSAPkcs1,
+                encryptionPaddings = EncryptionPadding.RSA_PKCS1,
                 signaturePaddings = null,
                 blockModes = BlockMode.ECB
             )
