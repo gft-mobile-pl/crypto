@@ -3,6 +3,10 @@ plugins {
     id 'org.jetbrains.kotlin.jvm'
 }
 
+jar{
+    from sourceSets.main.allSource
+}
+
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
