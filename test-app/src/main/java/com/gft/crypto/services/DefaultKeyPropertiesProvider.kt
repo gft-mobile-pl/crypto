@@ -21,7 +21,7 @@ class DefaultKeyPropertiesProvider : KeyPropertiesProvider<TestAppKeyUsagesScope
             cryptographicProperties = CryptographicProperties(
                 algorithm = Algorithm.RSA,
                 digests = emptySet(),
-                encryptionPaddings = setOf(EncryptionPadding.RSA_PKCS1),
+                encryptionPaddings = setOf(EncryptionPadding.RSAPkcs1),
                 signaturePaddings = emptySet(),
                 blockModes = setOf(BlockMode.ECB)
             )
@@ -35,7 +35,7 @@ class DefaultKeyPropertiesProvider : KeyPropertiesProvider<TestAppKeyUsagesScope
             cryptographicProperties = CryptographicProperties(
                 algorithm = Algorithm.AES,
                 digests = emptySet(),
-                encryptionPaddings = setOf(EncryptionPadding.NONE),
+                encryptionPaddings = setOf(EncryptionPadding.None),
                 signaturePaddings = emptySet(),
                 blockModes = setOf(BlockMode.GCM)
             )

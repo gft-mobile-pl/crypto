@@ -1,6 +1,6 @@
 package com.gft.crypto.domain.common.model
 
-enum class SignaturePadding {
-    RSA_PKCS1,
-    RSA_PSS,
+sealed interface SignaturePadding {
+    object RSAPkcs1: SignaturePadding
+    object RSAPss : SignaturePadding
 }

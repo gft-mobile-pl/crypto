@@ -1,8 +1,8 @@
 package com.gft.crypto.domain.common.model
 
-enum class BlockMode {
-    ECB,
-    CBC,
-    CTR,
-    GCM
+sealed interface BlockMode {
+    object ECB : BlockMode
+    object CBC : BlockMode
+    object CTR : BlockMode
+    object GCM : BlockMode
 }

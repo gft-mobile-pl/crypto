@@ -78,27 +78,27 @@ private fun Array<String>.toBlockModes() = map { blockMode ->
 
 private fun Array<String>.toEncryptionPaddings() = map { padding ->
     when (padding) {
-        NativeKeyProperties.ENCRYPTION_PADDING_NONE -> EncryptionPadding.NONE
-        NativeKeyProperties.ENCRYPTION_PADDING_PKCS7 -> EncryptionPadding.PKCS7
-        NativeKeyProperties.ENCRYPTION_PADDING_RSA_PKCS1 -> EncryptionPadding.RSA_PKCS1
-        NativeKeyProperties.ENCRYPTION_PADDING_RSA_OAEP -> EncryptionPadding.RSA_OAEP
+        NativeKeyProperties.ENCRYPTION_PADDING_NONE -> EncryptionPadding.None
+        NativeKeyProperties.ENCRYPTION_PADDING_PKCS7 -> EncryptionPadding.Pkcs7
+        NativeKeyProperties.ENCRYPTION_PADDING_RSA_PKCS1 -> EncryptionPadding.RSAPkcs1
+        NativeKeyProperties.ENCRYPTION_PADDING_RSA_OAEP -> EncryptionPadding.RSAOaep
         else -> throw IllegalArgumentException("$padding encryption padding is not supported.")
     }
 }.toSet()
 
 private fun Array<String>.toSignaturePaddings() = map { padding ->
     when (padding) {
-        NativeKeyProperties.SIGNATURE_PADDING_RSA_PKCS1 -> SignaturePadding.RSA_PKCS1
-        NativeKeyProperties.SIGNATURE_PADDING_RSA_PSS -> SignaturePadding.RSA_PSS
+        NativeKeyProperties.SIGNATURE_PADDING_RSA_PKCS1 -> SignaturePadding.RSAPkcs1
+        NativeKeyProperties.SIGNATURE_PADDING_RSA_PSS -> SignaturePadding.RSAPss
         else -> throw IllegalArgumentException("$padding signature padding is not supported.")
     }
 }.toSet()
 
 private fun Array<String>.toDigests() = map { digest ->
     when (digest) {
-        NativeKeyProperties.DIGEST_SHA256 -> Digest.SHA_256
-        NativeKeyProperties.DIGEST_SHA384 -> Digest.SHA_384
-        NativeKeyProperties.DIGEST_SHA512 -> Digest.SHA_512
+        NativeKeyProperties.DIGEST_SHA256 -> Digest.SHA256
+        NativeKeyProperties.DIGEST_SHA384 -> Digest.SHA384
+        NativeKeyProperties.DIGEST_SHA512 -> Digest.SHA512
         else -> throw IllegalArgumentException("$digest digest is not supported.")
     }
 }.toSet()

@@ -25,21 +25,21 @@ internal fun KeyPurpose.toNativeKeyPurpose(): Int = when (this) {
 }
 
 internal fun Digest.toNativeDigest() = when (this) {
-    Digest.SHA_256 -> KeyProperties.DIGEST_SHA256
-    Digest.SHA_384 -> KeyProperties.DIGEST_SHA384
-    Digest.SHA_512 -> KeyProperties.DIGEST_SHA512
+    Digest.SHA256 -> KeyProperties.DIGEST_SHA256
+    Digest.SHA384 -> KeyProperties.DIGEST_SHA384
+    Digest.SHA512 -> KeyProperties.DIGEST_SHA512
 }
 
 internal fun SignaturePadding.toNativePadding() = when (this) {
-    SignaturePadding.RSA_PKCS1 -> KeyProperties.SIGNATURE_PADDING_RSA_PKCS1
-    SignaturePadding.RSA_PSS -> KeyProperties.SIGNATURE_PADDING_RSA_PSS
+    SignaturePadding.RSAPkcs1 -> KeyProperties.SIGNATURE_PADDING_RSA_PKCS1
+    SignaturePadding.RSAPss -> KeyProperties.SIGNATURE_PADDING_RSA_PSS
 }
 
 internal fun EncryptionPadding.toNativePadding() = when (this) {
-    EncryptionPadding.NONE -> KeyProperties.ENCRYPTION_PADDING_NONE
-    EncryptionPadding.PKCS7 -> KeyProperties.ENCRYPTION_PADDING_PKCS7
-    EncryptionPadding.RSA_PKCS1 -> KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1
-    EncryptionPadding.RSA_OAEP -> KeyProperties.ENCRYPTION_PADDING_RSA_OAEP
+    EncryptionPadding.None -> KeyProperties.ENCRYPTION_PADDING_NONE
+    EncryptionPadding.Pkcs7 -> KeyProperties.ENCRYPTION_PADDING_PKCS7
+    EncryptionPadding.RSAPkcs1 -> KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1
+    EncryptionPadding.RSAOaep -> KeyProperties.ENCRYPTION_PADDING_RSA_OAEP
 }
 
 internal fun UnlockPolicy.toUnlockRequired() = when (this) {
