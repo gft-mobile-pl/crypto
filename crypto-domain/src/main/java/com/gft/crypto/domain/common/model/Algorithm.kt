@@ -1,6 +1,6 @@
 package com.gft.crypto.domain.common.model
 
-enum class Algorithm {
-    AES,
-    RSA
+sealed interface Algorithm {
+    object AES : Algorithm
+    object RSA : Algorithm
 }
