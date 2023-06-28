@@ -9,11 +9,11 @@ import com.gft.crypto.domain.keys.model.KeyPurpose
 import com.gft.crypto.domain.keys.model.UnlockPolicy
 import com.gft.crypto.domain.keys.model.UserAuthenticationPolicy
 import com.gft.crypto.domain.keys.services.KeyPropertiesProvider
-import com.gft.crypto.model.TestAppKeyUsagesScopes
+import com.gft.crypto.model.TestAppCryptographyUsageScope
 
-class DefaultKeyPropertiesProvider : KeyPropertiesProvider<TestAppKeyUsagesScopes> {
-    override fun getKeyProperties(scope: TestAppKeyUsagesScopes): KeyProperties = when (scope) {
-        TestAppKeyUsagesScopes.EncryptingMessages -> KeyProperties(
+class DefaultKeyPropertiesProvider : KeyPropertiesProvider<TestAppCryptographyUsageScope> {
+    override fun getKeyProperties(usageScope: TestAppCryptographyUsageScope): KeyProperties = when (usageScope) {
+        TestAppCryptographyUsageScope.EncryptingMessages -> KeyProperties(
             purposes = setOf(KeyPurpose.Decryption),
             keySize = 2048,
             unlockPolicy = UnlockPolicy.Required,
@@ -27,7 +27,7 @@ class DefaultKeyPropertiesProvider : KeyPropertiesProvider<TestAppKeyUsagesScope
             )
         )
 
-        TestAppKeyUsagesScopes.SecuritySharedPreferences -> KeyProperties(
+        TestAppCryptographyUsageScope.SecuritySharedPreferences -> KeyProperties(
             purposes = setOf(KeyPurpose.Encryption, KeyPurpose.Decryption),
             keySize = 256,
             unlockPolicy = UnlockPolicy.Required,

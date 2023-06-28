@@ -3,18 +3,18 @@ package com.gft.crypto.framework.keys.services
 import android.security.keystore.KeyProperties
 import com.gft.crypto.domain.common.model.Algorithm
 import com.gft.crypto.domain.keys.model.KeyContainer
-import com.gft.crypto.domain.common.model.CryptographicScope
+import com.gft.crypto.domain.common.model.UsageScope
 import com.gft.crypto.domain.keys.services.KeyPropertiesProvider
 import com.gft.crypto.domain.keys.services.KeysFactory
 import com.gft.crypto.framework.keys.utils.resolveComplementaryPublicPurposes
 import java.security.KeyPairGenerator
 import javax.crypto.KeyGenerator
 
-class DefaultKeysFactory<T : CryptographicScope>(
+class DefaultKeysFactory<T : UsageScope>(
     private val keyPropertiesProvider: KeyPropertiesProvider<T>
 ) : KeysFactory<T> {
-    override fun <R : T> generateKey(scope: R): Set<KeyContainer> {
-        val keyProperties = keyPropertiesProvider.getKeyProperties(scope)
+    override fun <R : T> generateKey(usageScope: R): Set<KeyContainer> {
+        val keyProperties = keyPropertiesProvider.getKeyProperties(usageScope)
         return when (keyProperties.cryptographicProperties.algorithm) {
             Algorithm.AES -> {
                 KeyGenerator

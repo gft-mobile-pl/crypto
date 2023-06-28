@@ -1,8 +1,8 @@
 package com.gft.crypto.domain.keys.services
 
 import com.gft.crypto.domain.keys.model.KeyContainer
-import com.gft.crypto.domain.common.model.CryptographicScope
+import com.gft.crypto.domain.common.model.UsageScope
 
-interface KeysFactory<T : CryptographicScope> {
-    fun <R : T> generateKey(scope: R): Set<KeyContainer>
+interface KeysFactory<T : UsageScope> {
+    fun <R : T> generateKey(usageScope: R): Set<KeyContainer>
 }

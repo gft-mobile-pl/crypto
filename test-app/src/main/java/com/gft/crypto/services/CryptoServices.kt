@@ -5,7 +5,7 @@ import com.gft.crypto.domain.keys.services.KeysFactory
 import com.gft.crypto.framework.keys.repositories.OsBackedKeysRepository
 import com.gft.crypto.framework.keys.services.DefaultKeyPropertiesExtractor
 import com.gft.crypto.framework.keys.services.DefaultKeysFactory
-import com.gft.crypto.model.TestAppKeyUsagesScopes
+import com.gft.crypto.model.TestAppCryptographyUsageScope
 import java.security.KeyStore
 
 object CryptoServices {
@@ -14,12 +14,12 @@ object CryptoServices {
     }
     private val keyPropertiesProvider = DefaultKeyPropertiesProvider()
     private val keyPropertiesExtractor = DefaultKeyPropertiesExtractor(keyStore = keyStore)
-    val keysRepository: KeysRepository<TestAppKeyUsagesScopes> = OsBackedKeysRepository(
+    val keysRepository: KeysRepository<TestAppCryptographyUsageScope> = OsBackedKeysRepository(
         keyStore = keyStore,
         keyPropertiesProvider = keyPropertiesProvider,
         keyPropertiesExtractor = keyPropertiesExtractor
     )
-    val keysFactory: KeysFactory<TestAppKeyUsagesScopes> = DefaultKeysFactory(
+    val keysFactory: KeysFactory<TestAppCryptographyUsageScope> = DefaultKeysFactory(
         keyPropertiesProvider
     )
 }

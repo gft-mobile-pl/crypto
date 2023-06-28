@@ -10,7 +10,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.gft.crypto.model.TestAppKeyUsagesScopes
+import com.gft.crypto.model.TestAppCryptographyUsageScope
 import com.gft.crypto.services.CryptoServices
 import com.gft.crypto.services.CryptoServices.keysRepository
 import com.gft.crypto.ui.theme.CryptolibraryTheme
@@ -32,8 +32,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Button(onClick = {
-                        keysRepository.createKey(SharedPrefsKeyAlias, TestAppKeyUsagesScopes.SecuritySharedPreferences)
-                        keysRepository.createKey(EncryptorKeyAlias, TestAppKeyUsagesScopes.EncryptingMessages)
+                        keysRepository.createKey(SharedPrefsKeyAlias, TestAppCryptographyUsageScope.SecuritySharedPreferences)
+                        keysRepository.createKey(EncryptorKeyAlias, TestAppCryptographyUsageScope.EncryptingMessages)
                     }) {
                         Text(text = "Create 2 keys")
                     }
