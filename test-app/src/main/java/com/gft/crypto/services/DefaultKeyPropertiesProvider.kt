@@ -2,7 +2,7 @@ package com.gft.crypto.services
 
 import com.gft.crypto.domain.common.model.Algorithm
 import com.gft.crypto.domain.common.model.BlockMode
-import com.gft.crypto.domain.common.model.CryptographicOperationParams
+import com.gft.crypto.domain.common.model.DataEncryption
 import com.gft.crypto.domain.common.model.EncryptionPadding
 import com.gft.crypto.domain.keys.model.KeyProperties
 import com.gft.crypto.domain.keys.model.KeyPurpose
@@ -18,11 +18,9 @@ class DefaultKeyPropertiesProvider : KeyPropertiesProvider<TestAppCryptographyUs
             keySize = 2048,
             unlockPolicy = UnlockPolicy.Required,
             userAuthenticationPolicy = UserAuthenticationPolicy.RequiredAfterBoot,
-            supportedOperationParams = CryptographicOperationParams(
+            supportedTransformations = DataEncryption(
                 algorithm = Algorithm.RSA,
-                digests = null,
-                encryptionPaddings = EncryptionPadding.RSA_PKCS1,
-                signaturePaddings = null,
+                padding = EncryptionPadding.RSA_PKCS1,
                 blockModes = BlockMode.ECB
             )
         )
@@ -32,11 +30,9 @@ class DefaultKeyPropertiesProvider : KeyPropertiesProvider<TestAppCryptographyUs
             keySize = 256,
             unlockPolicy = UnlockPolicy.Required,
             userAuthenticationPolicy = UserAuthenticationPolicy.BiometricAuthenticationRequiredOnEachUse,
-            supportedOperationParams = CryptographicOperationParams(
+            supportedTransformations = DataEncryption(
                 algorithm = Algorithm.AES,
-                digests = null,
-                encryptionPaddings = EncryptionPadding.None,
-                signaturePaddings = null,
+                padding = EncryptionPadding.None,
                 blockModes = BlockMode.GCM
             )
         )

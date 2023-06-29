@@ -3,9 +3,11 @@ package com.gft.crypto.framework.keys.services
 import android.security.keystore.KeyInfo
 import com.gft.crypto.domain.common.model.Algorithm
 import com.gft.crypto.domain.common.model.BlockMode
-import com.gft.crypto.domain.common.model.CryptographicOperationParams
+import com.gft.crypto.domain.common.model.DataEncryption
 import com.gft.crypto.domain.common.model.Digest
 import com.gft.crypto.domain.common.model.EncryptionPadding
+import com.gft.crypto.domain.common.model.KeyWrapping
+import com.gft.crypto.domain.common.model.MessageSigning
 import com.gft.crypto.domain.common.model.SignaturePadding
 import com.gft.crypto.domain.keys.model.KeyProperties
 import com.gft.crypto.domain.keys.model.KeyPurpose
@@ -28,9 +30,10 @@ class DefaultKeyPropertiesExtractor(
 
     override fun resolveKeyProperties(key: Key) = getKeyInfo(key)
         .let { keyInfo ->
+            val keyPurposes = keyInfo.purposes.toKeyPurposes()
             KeyProperties(
                 keySize = keyInfo.keySize,
-                purposes = keyInfo.purposes.toKeyPurposes(),
+                purposes = keyPurposes,
                 unlockPolicy = UnlockPolicy.Unknown,
                 userAuthenticationPolicy = if (keyInfo.isUserAuthenticationRequired) {
                     when (keyInfo.userAuthenticationValidityDurationSeconds) {
@@ -41,13 +44,25 @@ class DefaultKeyPropertiesExtractor(
                 } else {
                     UserAuthenticationPolicy.NotRequired
                 },
-                supportedOperationParams = CryptographicOperationParams(
-                    algorithm = key.algorithm.toKeyAlgorithm(),
-                    digests = keyInfo.digests.toDigests(),
-                    signaturePaddings = keyInfo.signaturePaddings.toSignaturePaddings(),
-                    encryptionPaddings = keyInfo.encryptionPaddings.toEncryptionPaddings(),
-                    blockModes = keyInfo.blockModes.toBlockModes()
-                )
+                supportedTransformations = when (keyPurposes.first()) {
+                    KeyPurpose.Decryption, KeyPurpose.Encryption -> DataEncryption(
+                        algorithm = key.algorithm.toKeyAlgorithm(),
+                        blockModes = keyInfo.blockModes.toBlockModes(),
+                        padding = keyInfo.encryptionPaddings.toEncryptionPaddings()
+                    )
+
+                    KeyPurpose.SignatureVerification, KeyPurpose.Signing -> MessageSigning(
+                        algorithm = key.algorithm.toKeyAlgorithm(),
+                        digest = keyInfo.digests.toDigests(),
+                        padding = keyInfo.encryptionPaddings.toSignaturePaddings()
+                    )
+
+                    KeyPurpose.Wrapping -> KeyWrapping(
+                        algorithm = key.algorithm.toKeyAlgorithm(),
+                        blockModes = keyInfo.blockModes.toBlockModes(),
+                        padding = keyInfo.encryptionPaddings.toEncryptionPaddings()
+                    )
+                }
             )
         }
 
@@ -66,7 +81,7 @@ class DefaultKeyPropertiesExtractor(
     }
 }
 
-private fun Array<String>.toBlockModes() = firstOrNull()?.let { blockMode ->
+private fun Array<String>.toBlockModes() = first().let { blockMode ->
     when (blockMode) {
         NativeKeyProperties.BLOCK_MODE_ECB -> BlockMode.ECB
         NativeKeyProperties.BLOCK_MODE_CBC -> BlockMode.CBC
@@ -76,7 +91,7 @@ private fun Array<String>.toBlockModes() = firstOrNull()?.let { blockMode ->
     }
 }
 
-private fun Array<String>.toEncryptionPaddings() = firstOrNull()?.let { padding ->
+private fun Array<String>.toEncryptionPaddings() = first().let { padding ->
     when (padding) {
         NativeKeyProperties.ENCRYPTION_PADDING_NONE -> EncryptionPadding.None
         NativeKeyProperties.ENCRYPTION_PADDING_PKCS7 -> EncryptionPadding.PKSC7
@@ -86,7 +101,7 @@ private fun Array<String>.toEncryptionPaddings() = firstOrNull()?.let { padding 
     }
 }
 
-private fun Array<String>.toSignaturePaddings() = firstOrNull()?.let { padding ->
+private fun Array<String>.toSignaturePaddings() = first().let { padding ->
     when (padding) {
         NativeKeyProperties.SIGNATURE_PADDING_RSA_PKCS1 -> SignaturePadding.RSA_PKCS1
         NativeKeyProperties.SIGNATURE_PADDING_RSA_PSS -> SignaturePadding.RSA_PSS
@@ -94,7 +109,7 @@ private fun Array<String>.toSignaturePaddings() = firstOrNull()?.let { padding -
     }
 }
 
-private fun Array<String>.toDigests() = firstOrNull()?.let { digest ->
+private fun Array<String>.toDigests() = first().let { digest ->
     when (digest) {
         NativeKeyProperties.DIGEST_SHA256 -> Digest.SHA_256
         NativeKeyProperties.DIGEST_SHA384 -> Digest.SHA_384
