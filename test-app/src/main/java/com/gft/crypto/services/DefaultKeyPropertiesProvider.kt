@@ -17,7 +17,7 @@ class DefaultKeyPropertiesProvider : KeyPropertiesProvider<TestAppCryptographyUs
             purposes = setOf(KeyPurpose.Decryption),
             keySize = 2048,
             unlockPolicy = UnlockPolicy.Required,
-            userAuthenticationPolicy = UserAuthenticationPolicy.RequiredAfterBoot,
+            userAuthenticationPolicy = UserAuthenticationPolicy.NotRequired,
             supportedTransformations = DataEncryption(
                 algorithm = Algorithm.RSA,
                 padding = EncryptionPadding.RSA_PKCS1,
@@ -29,7 +29,7 @@ class DefaultKeyPropertiesProvider : KeyPropertiesProvider<TestAppCryptographyUs
             purposes = setOf(KeyPurpose.Encryption, KeyPurpose.Decryption),
             keySize = 256,
             unlockPolicy = UnlockPolicy.Required,
-            userAuthenticationPolicy = UserAuthenticationPolicy.BiometricAuthenticationRequiredOnEachUse,
+            userAuthenticationPolicy = UserAuthenticationPolicy.NotRequired,
             supportedTransformations = DataEncryption(
                 algorithm = Algorithm.AES,
                 padding = EncryptionPadding.None,
