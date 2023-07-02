@@ -3,12 +3,11 @@ package com.gft.crypto.domain.keys.model
 import com.gft.crypto.domain.common.model.Transformation
 import kotlin.time.Duration
 
-data class KeyProperties(
-    val purposes: Set<KeyPurpose>,
+data class KeyProperties<SupportedTransformation : Transformation>(
     val keySize: Int,
     val unlockPolicy: UnlockPolicy,
     val userAuthenticationPolicy: UserAuthenticationPolicy,
-    val supportedTransformations: Transformation
+    val supportedTransformation: SupportedTransformation
 )
 
 sealed interface UserAuthenticationPolicy {
@@ -23,4 +22,3 @@ sealed interface UnlockPolicy {
     object NotRequired : UnlockPolicy
     object Unknown : UnlockPolicy
 }
-

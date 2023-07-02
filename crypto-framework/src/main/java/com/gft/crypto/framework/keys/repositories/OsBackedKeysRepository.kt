@@ -1,98 +1,150 @@
 package com.gft.crypto.framework.keys.repositories
 
-import android.annotation.SuppressLint
-import android.os.Build
-import android.security.keystore.KeyGenParameterSpec
+import android.content.SharedPreferences
 import com.gft.crypto.domain.common.model.Algorithm
-import com.gft.crypto.domain.common.model.Encryption
-import com.gft.crypto.domain.common.model.MessageSigning
-import com.gft.crypto.domain.common.model.UsageScope
+import com.gft.crypto.domain.common.model.BlockMode
+import com.gft.crypto.domain.common.model.Digest
+import com.gft.crypto.domain.common.model.EncryptionPadding
+import com.gft.crypto.domain.common.model.SignaturePadding
+import com.gft.crypto.domain.common.model.Transformation
+import com.gft.crypto.domain.keys.model.KeyAlias
 import com.gft.crypto.domain.keys.model.KeyContainer
 import com.gft.crypto.domain.keys.model.KeyProperties
+import com.gft.crypto.domain.keys.model.KeyStoreCompatible
+import com.gft.crypto.domain.keys.model.UnlockPolicy
 import com.gft.crypto.domain.keys.model.UserAuthenticationPolicy
 import com.gft.crypto.domain.keys.repositories.KeysRepository
 import com.gft.crypto.domain.keys.services.KeyPropertiesExtractor
-import com.gft.crypto.domain.keys.services.KeyPropertiesProvider
 import com.gft.crypto.framework.keys.utils.assertIsAndroidKeyStore
-import com.gft.crypto.framework.keys.utils.resolveComplementaryPublicPurposes
-import com.gft.crypto.framework.keys.utils.toNativeBlockMode
-import com.gft.crypto.framework.keys.utils.toNativeDigest
-import com.gft.crypto.framework.keys.utils.toNativeKeyPurpose
-import com.gft.crypto.framework.keys.utils.toNativePadding
-import com.gft.crypto.framework.keys.utils.toUnlockRequired
+import com.gft.crypto.framework.keys.utils.toKeyGenParameterSpec
+import com.gft.crypto.framework.keys.utils.toNativeKeyAlgorithm
 import java.security.KeyPairGenerator
 import java.security.KeyStore
 import javax.crypto.KeyGenerator
-import kotlin.time.Duration
-import kotlin.time.DurationUnit
-import android.security.keystore.KeyProperties as NativeKeyProperties
 
-open class OsBackedKeysRepository<T : UsageScope>(
+private const val ALGORITHM_TOKEN = "_algorithm"
+private const val DIGEST_TOKEN = "_digest"
+private const val PADDING_TOKEN = "_padding"
+private const val BLOCK_MODE_TOKEN = "_block_mode"
+private const val CANONICAL_TRANSFORMATION_TOKEN = "_canonical_transformation"
+private const val UNLOCK_REQUIRED_TOKEN = "_unlock_required"
+
+open class OsBackedKeysRepository(
     private val keyStore: KeyStore,
-    private val keyPropertiesProvider: KeyPropertiesProvider<in T>,
-    private val keyPropertiesExtractor: KeyPropertiesExtractor
-) : KeysRepository<T> {
+    private val keyPropertiesExtractor: KeyPropertiesExtractor,
+    private val sharedPreferences: SharedPreferences
+) : KeysRepository {
     init {
         keyStore.assertIsAndroidKeyStore()
     }
 
-    override fun <R : T> createKey(alias: String, usageScope: R) {
-        if (containsKey(alias)) {
-            throw IllegalStateException("Key with alias $alias is already registered in the repository.")
-        }
-        val keyProperties = keyPropertiesProvider.getKeyProperties(usageScope)
-        val keyGenParameterSpec = keyProperties.toKeyGenParameterSpec(alias)
-        when (keyProperties.supportedTransformations.algorithm) {
-            Algorithm.AES -> {
-                KeyGenerator
-                    .getInstance(NativeKeyProperties.KEY_ALGORITHM_AES, keyStore.provider.name)
-                    .apply {
-                        init(keyGenParameterSpec)
-                    }
-                    .generateKey()
-            }
+    @Suppress("INAPPLICABLE_JVM_NAME")
+    @JvmName("createDataEncryptionKey")
+    override fun <T> createKey(
+        alias: KeyAlias<Transformation.DataEncryption>,
+        properties: KeyProperties<T>
+    ) where T : Transformation.DataEncryption, T : KeyStoreCompatible = createAndStoreKey(alias, properties)
 
-            Algorithm.RSA -> {
+    @Suppress("INAPPLICABLE_JVM_NAME")
+    @JvmName("createMessageSingingKey")
+    override fun <T> createKey(
+        alias: KeyAlias<Transformation.MessageSigning>,
+        properties: KeyProperties<T>
+    ) where T : Transformation.MessageSigning, T : KeyStoreCompatible = createAndStoreKey(alias, properties)
+
+    @Suppress("INAPPLICABLE_JVM_NAME")
+    @JvmName("createKeyWrappingKey")
+    override fun <T> createKey(
+        alias: KeyAlias<Transformation.KeyWrapping>,
+        properties: KeyProperties<T>
+    ) where T : Transformation.KeyWrapping, T : KeyStoreCompatible = createAndStoreKey(alias, properties)
+
+    private fun createAndStoreKey(alias: KeyAlias<*>, keyProperties: KeyProperties<*>) {
+        if (containsKey(alias)) {
+            throw IllegalStateException("Key with alias ${alias.alias} is already registered in the repository.")
+        }
+        val keyGenParameterSpec = keyProperties.toKeyGenParameterSpec(alias.alias)
+        when (keyProperties.supportedTransformation.algorithm) {
+            Algorithm.RSA,
+            Algorithm.ECDSA -> {
                 KeyPairGenerator
-                    .getInstance(
-                        NativeKeyProperties.KEY_ALGORITHM_RSA, keyStore.provider.name
-                    )
-                    .apply {
-                        initialize(keyGenParameterSpec)
-                    }
+                    .getInstance(keyProperties.supportedTransformation.algorithm.toNativeKeyAlgorithm(), keyStore.provider.name)
+                    .apply { initialize(keyGenParameterSpec) }
                     .generateKeyPair()
             }
+
+            else -> {
+                KeyGenerator
+                    .getInstance(keyProperties.supportedTransformation.algorithm.toNativeKeyAlgorithm(), keyStore.provider.name)
+                    .apply { init(keyGenParameterSpec) }
+                    .generateKey()
+            }
         }
+
+        sharedPreferences.edit()
+            .putString("${alias.alias}$ALGORITHM_TOKEN", keyProperties.supportedTransformation.algorithm.name)
+            .putBoolean("${alias.alias}$UNLOCK_REQUIRED_TOKEN", keyProperties.unlockPolicy == UnlockPolicy.Required)
+            .putString("${alias.alias}$CANONICAL_TRANSFORMATION_TOKEN", keyProperties.supportedTransformation.canonicalTransformation)
+            .apply {
+                when (val transformation = keyProperties.supportedTransformation) {
+                    is Transformation.DataEncryption -> {
+                        putString("${alias.alias}$PADDING_TOKEN", transformation.padding.name)
+                        putString("${alias.alias}$BLOCK_MODE_TOKEN", transformation.blockMode.name)
+                        putString("${alias.alias}$DIGEST_TOKEN", transformation.digest.name)
+                    }
+
+                    is Transformation.KeyWrapping -> {
+                        putString("${alias.alias}$PADDING_TOKEN", transformation.padding.name)
+                        putString("${alias.alias}$BLOCK_MODE_TOKEN", transformation.blockMode.name)
+                        putString("${alias.alias}$DIGEST_TOKEN", transformation.digest.name)
+                    }
+
+                    is Transformation.MessageSigning -> {
+                        putString("${alias.alias}$PADDING_TOKEN", transformation.padding.name)
+                        putString("${alias.alias}$DIGEST_TOKEN", transformation.digest.name)
+                    }
+                }
+            }
+            .apply()
     }
 
-    override fun getKey(alias: String): Set<KeyContainer> {
-        if (!keyStore.containsAlias(alias)) {
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : Transformation> getKey(alias: KeyAlias<T>): Set<KeyContainer<T>> {
+        if (!keyStore.containsAlias(alias.alias)) {
             throw IllegalArgumentException("There is not key with alias $alias registered in the repository.")
         }
+
         return when {
-            keyStore.entryInstanceOf(alias, KeyStore.SecretKeyEntry::class.java) -> {
-                val secretKey = keyStore.getKey(alias, null)
-                val keyProperties = keyPropertiesExtractor.resolveKeyProperties(secretKey)
+            keyStore.entryInstanceOf(alias.alias, KeyStore.SecretKeyEntry::class.java) -> {
+                val secretKey = keyStore.getKey(alias.alias, null)
+                val keyProperties = keyPropertiesExtractor
+                    .resolveKeyProperties(secretKey)
+                    .updateWithDataFromSharedPreferences(alias.alias)
                 setOf(
                     KeyContainer(
                         key = secretKey,
-                        keyPurposes = keyProperties.purposes
+                        properties = keyProperties as KeyProperties<T>
                     )
                 )
             }
 
-            keyStore.entryInstanceOf(alias, KeyStore.PrivateKeyEntry::class.java) -> {
-                val publicKey = keyStore.getCertificate(alias).publicKey
-                val privateKey = keyStore.getKey(alias, null)
-                val keyProperties = keyPropertiesExtractor.resolveKeyProperties(privateKey)
+            keyStore.entryInstanceOf(alias.alias, KeyStore.PrivateKeyEntry::class.java) -> {
+                val publicKey = keyStore.getCertificate(alias.alias).publicKey
+                val privateKey = keyStore.getKey(alias.alias, null)
+                val keyProperties = keyPropertiesExtractor
+                    .resolveKeyProperties(privateKey)
+                    .updateWithDataFromSharedPreferences(alias.alias)
                 setOf(
                     KeyContainer(
-                        key = publicKey,
-                        keyPurposes = keyProperties.purposes.resolveComplementaryPublicPurposes()
+                        key = privateKey,
+                        properties = keyProperties as KeyProperties<T>
                     ),
                     KeyContainer(
-                        key = keyStore.getKey(alias, null),
-                        keyPurposes = keyProperties.purposes
+                        key = publicKey,
+                        properties = keyProperties.copy(
+                            // public keys never require user authentication
+                            userAuthenticationPolicy = UserAuthenticationPolicy.NotRequired
+                        )
                     )
                 )
             }
@@ -101,78 +153,79 @@ open class OsBackedKeysRepository<T : UsageScope>(
         }
     }
 
-    override fun deleteKey(alias: String) {
-        if (keyStore.containsAlias(alias)) keyStore.deleteEntry(alias)
+    override fun deleteKey(alias: KeyAlias<*>) {
+        if (!keyStore.containsAlias(alias.alias)) return
+        keyStore.deleteEntry(alias.alias)
+        sharedPreferences.edit()
+            .remove("${alias.alias}$ALGORITHM_TOKEN")
+            .remove("${alias.alias}$DIGEST_TOKEN")
+            .remove("${alias.alias}$BLOCK_MODE_TOKEN")
+            .remove("${alias.alias}$PADDING_TOKEN")
+            .remove("${alias.alias}$CANONICAL_TRANSFORMATION_TOKEN")
+            .remove("${alias.alias}$UNLOCK_REQUIRED_TOKEN")
+            .apply()
     }
 
-    override fun containsKey(alias: String) = keyStore.containsAlias(alias)
+    override fun containsKey(alias: KeyAlias<*>) = keyStore.containsAlias(alias.alias)
+
+    private fun KeyProperties<*>.updateWithDataFromSharedPreferences(keyAlias: String): KeyProperties<*> {
+        val algorithm = Algorithm(sharedPreferences.getString("${keyAlias}$ALGORITHM_TOKEN", "")!!)
+        val unlockPolicy = sharedPreferences.getBoolean("${keyAlias}$UNLOCK_REQUIRED_TOKEN", false)
+            .let { required -> if (required) UnlockPolicy.Required else UnlockPolicy.NotRequired }
+        val canonicalTransformation = sharedPreferences.getString("${keyAlias}$CANONICAL_TRANSFORMATION_TOKEN", "")!!
+        val effectiveTransformation = when (supportedTransformation) {
+            is Transformation.DataEncryption -> {
+                GeneralDataEncryption(
+                    algorithm,
+                    BlockMode(sharedPreferences.getString("${keyAlias}$BLOCK_MODE_TOKEN", "")!!),
+                    Digest(sharedPreferences.getString("${keyAlias}$DIGEST_TOKEN", "")!!),
+                    EncryptionPadding(sharedPreferences.getString("${keyAlias}$PADDING_TOKEN", "")!!),
+                    canonicalTransformation
+                )
+            }
+
+            is Transformation.KeyWrapping -> GeneralKeyWrapping(
+                algorithm,
+                BlockMode(sharedPreferences.getString("${keyAlias}$BLOCK_MODE_TOKEN", "")!!),
+                Digest(sharedPreferences.getString("${keyAlias}$DIGEST_TOKEN", "")!!),
+                EncryptionPadding(sharedPreferences.getString("${keyAlias}$PADDING_TOKEN", "")!!),
+                canonicalTransformation
+            )
+
+            is Transformation.MessageSigning -> GeneralMessageSigning(
+                algorithm,
+                Digest(sharedPreferences.getString("${keyAlias}$DIGEST_TOKEN", "")!!),
+                SignaturePadding(sharedPreferences.getString("${keyAlias}$PADDING_TOKEN", "")!!),
+                canonicalTransformation
+            )
+        }
+        @Suppress("UNCHECKED_CAST")
+        return (this as KeyProperties<Transformation>).copy(
+            unlockPolicy = unlockPolicy,
+            supportedTransformation = effectiveTransformation
+        )
+    }
 }
 
-@SuppressLint("WrongConstant")
-private fun KeyProperties.toKeyGenParameterSpec(alias: String) = KeyGenParameterSpec
-    .Builder(
-        alias,
-        purposes.sumOf { purpose -> purpose.toNativeKeyPurpose() }
-    )
-    .apply {
-        setKeySize(keySize)
-        when (val transformation = supportedTransformations) {
-            is MessageSigning -> {
-                setDigests(transformation.digest.toNativeDigest())
-                setSignaturePaddings(transformation.padding.toNativePadding())
-            }
+private class GeneralDataEncryption(
+    algorithm: Algorithm,
+    blockMode: BlockMode,
+    digest: Digest,
+    padding: EncryptionPadding,
+    override val canonicalTransformation: String
+) : Transformation.DataEncryption(algorithm, blockMode, digest, padding)
 
-            is Encryption -> {
-                setBlockModes(transformation.blockModes.toNativeBlockMode())
-                setEncryptionPaddings(transformation.padding.toNativePadding())
-            }
-        }
-        when (val authenticationPolicy = userAuthenticationPolicy) {
-            is UserAuthenticationPolicy.Required -> {
-                if (authenticationPolicy.timeout <= Duration.ZERO) {
-                    throw IllegalArgumentException("timeout value of UserAuthenticationPolicy.Required should be greater than 0.")
-                }
-                setUserAuthenticationRequired(true)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    setUserAuthenticationParameters(
-                        authenticationPolicy.timeout.toInt(DurationUnit.SECONDS),
-                        NativeKeyProperties.AUTH_DEVICE_CREDENTIAL + NativeKeyProperties.AUTH_BIOMETRIC_STRONG
-                    )
-                } else {
-                    @Suppress("DEPRECATION")
-                    setUserAuthenticationValidityDurationSeconds(
-                        authenticationPolicy.timeout.toInt(DurationUnit.SECONDS),
-                    )
-                }
-            }
+private class GeneralKeyWrapping(
+    algorithm: Algorithm,
+    blockMode: BlockMode,
+    digest: Digest,
+    padding: EncryptionPadding,
+    override val canonicalTransformation: String
+) : Transformation.KeyWrapping(algorithm, blockMode, digest, padding)
 
-            is UserAuthenticationPolicy.RequiredAfterBoot -> {
-                setUserAuthenticationRequired(true)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    setUserAuthenticationParameters(
-                        Int.MAX_VALUE,
-                        NativeKeyProperties.AUTH_DEVICE_CREDENTIAL + NativeKeyProperties.AUTH_BIOMETRIC_STRONG
-                    )
-                } else {
-                    @Suppress("DEPRECATION")
-                    setUserAuthenticationValidityDurationSeconds(Int.MAX_VALUE)
-                }
-            }
-
-            is UserAuthenticationPolicy.BiometricAuthenticationRequiredOnEachUse -> {
-                setUserAuthenticationRequired(true)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    setUserAuthenticationParameters(0, NativeKeyProperties.AUTH_BIOMETRIC_STRONG)
-                } else {
-                    @Suppress("DEPRECATION")
-                    setUserAuthenticationValidityDurationSeconds(-1)
-                }
-            }
-
-            UserAuthenticationPolicy.NotRequired -> {
-                setUserAuthenticationRequired(false)
-            }
-        }
-        setUnlockedDeviceRequired(unlockPolicy.toUnlockRequired())
-    }
-    .build()
+private class GeneralMessageSigning(
+    algorithm: Algorithm,
+    digest: Digest,
+    padding: SignaturePadding,
+    override val canonicalTransformation: String
+) : Transformation.MessageSigning(algorithm, digest, padding)

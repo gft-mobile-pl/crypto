@@ -1,7 +1,14 @@
 package com.gft.crypto.domain.common.model
 
-enum class Digest {
-    SHA_256,
-    SHA_384,
-    SHA_512
+@JvmInline
+value class Digest(val name: String) {
+    companion object {
+        val NONE = Digest("NONE")
+        val MD5 = Digest("MD5")
+        val SHA_1 = Digest("SHA1")
+        val SHA_224 = Digest("SHA224")
+        val SHA_256 = Digest("SHA256")
+        val SHA_384 = Digest("SHA384")
+        val SHA_512 = Digest("SHA512")
+    }
 }

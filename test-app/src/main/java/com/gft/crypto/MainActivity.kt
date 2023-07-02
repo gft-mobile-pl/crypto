@@ -10,21 +10,46 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.gft.crypto.model.TestAppCryptographyUsageScope
+import com.gft.crypto.domain.common.model.Transformation
+import com.gft.crypto.domain.keys.model.KeyAlias
+import com.gft.crypto.domain.keys.model.KeyProperties
+import com.gft.crypto.domain.keys.model.KeyStoreCompatibleDataEncryption
+import com.gft.crypto.domain.keys.model.KeyStoreCompatibleMessageSigning
+import com.gft.crypto.domain.keys.model.UnlockPolicy
+import com.gft.crypto.domain.keys.model.UserAuthenticationPolicy
 import com.gft.crypto.services.CryptoServices
 import com.gft.crypto.services.CryptoServices.keysRepository
 import com.gft.crypto.ui.theme.CryptolibraryTheme
-import java.security.KeyStore
 
-private const val SharedPrefsKeyAlias = "spkeyalias"
-private const val EncryptorKeyAlias = "enckeyalias"
+private val SharedPrefsKeyAlias = KeyAlias<Transformation.DataEncryption>("spkeyalias")
+private val SharedPrefsKeyProperties = KeyProperties(
+    keySize = 256,
+    unlockPolicy = UnlockPolicy.Required,
+    userAuthenticationPolicy = UserAuthenticationPolicy.NotRequired,
+    supportedTransformation = KeyStoreCompatibleDataEncryption.AES_GCM_NoPadding
+)
 
-private val keyStore = KeyStore.getInstance("AndroidKeyStore").apply {
-    load(null)
-}
+private val EncryptorKeyAlias = KeyAlias<Transformation.DataEncryption>("enckeyalias")
+private val EncryptorKeyProperties = KeyProperties(
+    keySize = 2048,
+    unlockPolicy = UnlockPolicy.Required,
+    userAuthenticationPolicy = UserAuthenticationPolicy.NotRequired,
+    supportedTransformation = KeyStoreCompatibleDataEncryption.RSA_ECB_PKCS1Padding
+)
+
+private val MessageSigningAlias = KeyAlias<Transformation.MessageSigning>("messagesigningalias")
+private val MessageSigningProperties = KeyProperties(
+    keySize = 2048,
+    unlockPolicy = UnlockPolicy.NotRequired,
+    userAuthenticationPolicy = UserAuthenticationPolicy.NotRequired,
+    supportedTransformation = KeyStoreCompatibleMessageSigning.SHA512_RSA
+)
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        CryptoServices.init(applicationContext)
+
         super.onCreate(savedInstanceState)
         setContent {
             CryptolibraryTheme {
@@ -32,17 +57,19 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Button(onClick = {
-                        keysRepository.createKey(SharedPrefsKeyAlias, TestAppCryptographyUsageScope.SecuritySharedPreferences)
-                        keysRepository.createKey(EncryptorKeyAlias, TestAppCryptographyUsageScope.EncryptingMessages)
+                        keysRepository.createKey(SharedPrefsKeyAlias, SharedPrefsKeyProperties)
+                        keysRepository.createKey(EncryptorKeyAlias, EncryptorKeyProperties)
+                        keysRepository.createKey(MessageSigningAlias, MessageSigningProperties)
                     }) {
-                        Text(text = "Create 2 keys")
+                        Text(text = "Create keys")
                     }
 
                     Button(onClick = {
                         println("#Test SharedPrefsKeyAlias = ${keysRepository.getKey(SharedPrefsKeyAlias)}")
-                        println("#Test EncryptorKeyAlias = ${keysRepository.getKey(EncryptorKeyAlias)}")
+                       println("#Test EncryptorKeyAlias = ${keysRepository.getKey(EncryptorKeyAlias)}")
+                        println("#Test MessageSigningAlias = ${keysRepository.getKey(MessageSigningAlias)}")
                     }) {
-                        Text(text = "Get 2 keys")
+                        Text(text = "Get keys")
                     }
 
                     Button(onClick = {
@@ -57,7 +84,5 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-
-        println("#Test keyStore = ${keyStore.provider.name}")
     }
 }
