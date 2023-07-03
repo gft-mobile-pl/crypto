@@ -10,14 +10,19 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.gft.crypto.domain.common.model.Algorithm
 import com.gft.crypto.domain.common.model.Transformation
 import com.gft.crypto.domain.keys.model.KeyAlias
 import com.gft.crypto.domain.keys.model.KeyProperties
 import com.gft.crypto.domain.keys.model.KeyStoreCompatibleDataEncryption
+import com.gft.crypto.domain.keys.model.KeyStoreCompatibleKeyWrapping
 import com.gft.crypto.domain.keys.model.KeyStoreCompatibleMessageSigning
+import com.gft.crypto.domain.keys.model.KeyType
 import com.gft.crypto.domain.keys.model.UnlockPolicy
 import com.gft.crypto.domain.keys.model.UserAuthenticationPolicy
 import com.gft.crypto.services.CryptoServices
+import com.gft.crypto.services.CryptoServices.keyWrapper
+import com.gft.crypto.services.CryptoServices.keysFactory
 import com.gft.crypto.services.CryptoServices.keysRepository
 import com.gft.crypto.ui.theme.CryptolibraryTheme
 
@@ -45,7 +50,6 @@ private val MessageSigningProperties = KeyProperties(
     supportedTransformation = KeyStoreCompatibleMessageSigning.SHA512_RSA
 )
 
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         CryptoServices.init(applicationContext)
@@ -65,8 +69,46 @@ class MainActivity : ComponentActivity() {
                     }
 
                     Button(onClick = {
+                        var counter = 0
+                        val keyToWrap = keysFactory.generateKey(256, KeyStoreCompatibleDataEncryption.AES_GCM_NoPadding).first()
+                        KeyStoreCompatibleKeyWrapping.getAll().forEach { transformation ->
+                            counter++
+
+                            val alias = KeyAlias<Transformation.KeyWrapping>("wrapper_$counter")
+                            try {
+                                println("#Test ---------------------------------------------------------------------------")
+                                print("#Test Adding wrapping key supporting ${transformation.canonicalTransformation}... ")
+                                keysRepository.createKey(
+                                    alias = alias,
+                                    properties = KeyProperties(
+                                        keySize = if (transformation.algorithm == Algorithm.AES) 256 else 2048,
+                                        unlockPolicy = UnlockPolicy.NotRequired,
+                                        userAuthenticationPolicy = UserAuthenticationPolicy.NotRequired,
+                                        supportedTransformation = transformation
+                                    )
+                                )
+                                println("COMPLETE")
+
+                                print("#Test Wrapping with ${transformation.canonicalTransformation}... ")
+                                val wrappedKey = keyWrapper.wrap(alias, keyToWrap).perform()
+                                println("COMPLETE $wrappedKey")
+                                print("#Test Unwrapping with ${transformation.canonicalTransformation}... ")
+                                val unwrappedKey = keyWrapper.unwrap(alias, wrappedKey, Algorithm.AES, KeyType.SECRET).perform()
+                                println("COMPLETE ($unwrappedKey)")
+                            } catch (e: Throwable) {
+                                println("FAILED")
+                                println("#Test Error: ${e.message} / ${e.cause?.message}")
+                            }
+
+                            keysRepository.deleteKey(alias)
+                        }
+                    }) {
+                        Text(text = "Wrap & Unwrap test")
+                    }
+
+                    Button(onClick = {
                         println("#Test SharedPrefsKeyAlias = ${keysRepository.getKey(SharedPrefsKeyAlias)}")
-                       println("#Test EncryptorKeyAlias = ${keysRepository.getKey(EncryptorKeyAlias)}")
+                        println("#Test EncryptorKeyAlias = ${keysRepository.getKey(EncryptorKeyAlias)}")
                         println("#Test MessageSigningAlias = ${keysRepository.getKey(MessageSigningAlias)}")
                     }) {
                         Text(text = "Get keys")

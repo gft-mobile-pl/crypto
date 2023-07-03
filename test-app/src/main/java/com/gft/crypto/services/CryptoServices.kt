@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.gft.crypto.domain.keys.repositories.KeysRepository
 import com.gft.crypto.domain.keys.services.KeysFactory
+import com.gft.crypto.domain.wrapping.services.KeyWrapper
 import com.gft.crypto.framework.keys.repositories.OsBackedKeysRepository
 import com.gft.crypto.framework.keys.services.DefaultKeyPropertiesExtractor
 import java.security.KeyStore
@@ -17,6 +18,7 @@ object CryptoServices {
     private val keyPropertiesExtractor = DefaultKeyPropertiesExtractor(keyStore = keyStore)
     private lateinit var sharedPreferences: SharedPreferences
     lateinit var keysRepository: KeysRepository
+    lateinit var keyWrapper: KeyWrapper
     val keysFactory: KeysFactory = KeysFactory()
 
     @Synchronized
@@ -30,5 +32,6 @@ object CryptoServices {
             keyPropertiesExtractor = keyPropertiesExtractor,
             sharedPreferences = sharedPreferences
         )
+        keyWrapper = KeyWrapper(keysRepository)
     }
 }
