@@ -1,10 +1,7 @@
 package com.gft.crypto.domain.common.model
 
 @JvmInline
-value class Algorithm(val name: String) {
-
-
-
+value class Algorithm private constructor(val name: String) {
     companion object {
         val AES = Algorithm("AES")
         val RSA = Algorithm("RSA")

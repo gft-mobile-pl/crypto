@@ -169,7 +169,7 @@ open class OsBackedKeysRepository(
     override fun containsKey(alias: KeyAlias<*>) = keyStore.containsAlias(alias.alias)
 
     private fun KeyProperties<*>.updateWithDataFromSharedPreferences(keyAlias: String): KeyProperties<*> {
-        val algorithm = Algorithm(sharedPreferences.getString("${keyAlias}$ALGORITHM_TOKEN", "")!!)
+        val algorithm = Algorithm.valueOf(sharedPreferences.getString("${keyAlias}$ALGORITHM_TOKEN", "")!!)
         val unlockPolicy = sharedPreferences.getBoolean("${keyAlias}$UNLOCK_REQUIRED_TOKEN", false)
             .let { required -> if (required) UnlockPolicy.Required else UnlockPolicy.NotRequired }
         val canonicalTransformation = sharedPreferences.getString("${keyAlias}$CANONICAL_TRANSFORMATION_TOKEN", "")!!
@@ -177,25 +177,25 @@ open class OsBackedKeysRepository(
             is Transformation.DataEncryption -> {
                 GeneralDataEncryption(
                     algorithm,
-                    BlockMode(sharedPreferences.getString("${keyAlias}$BLOCK_MODE_TOKEN", "")!!),
-                    Digest(sharedPreferences.getString("${keyAlias}$DIGEST_TOKEN", "")!!),
-                    EncryptionPadding(sharedPreferences.getString("${keyAlias}$PADDING_TOKEN", "")!!),
+                    BlockMode.valueOf(sharedPreferences.getString("${keyAlias}$BLOCK_MODE_TOKEN", "")!!),
+                    Digest.valueOf(sharedPreferences.getString("${keyAlias}$DIGEST_TOKEN", "")!!),
+                    EncryptionPadding.valueOf(sharedPreferences.getString("${keyAlias}$PADDING_TOKEN", "")!!),
                     canonicalTransformation
                 )
             }
 
             is Transformation.KeyWrapping -> GeneralKeyWrapping(
                 algorithm,
-                BlockMode(sharedPreferences.getString("${keyAlias}$BLOCK_MODE_TOKEN", "")!!),
-                Digest(sharedPreferences.getString("${keyAlias}$DIGEST_TOKEN", "")!!),
-                EncryptionPadding(sharedPreferences.getString("${keyAlias}$PADDING_TOKEN", "")!!),
+                BlockMode.valueOf(sharedPreferences.getString("${keyAlias}$BLOCK_MODE_TOKEN", "")!!),
+                Digest.valueOf(sharedPreferences.getString("${keyAlias}$DIGEST_TOKEN", "")!!),
+                EncryptionPadding.valueOf(sharedPreferences.getString("${keyAlias}$PADDING_TOKEN", "")!!),
                 canonicalTransformation
             )
 
             is Transformation.MessageSigning -> GeneralMessageSigning(
                 algorithm,
-                Digest(sharedPreferences.getString("${keyAlias}$DIGEST_TOKEN", "")!!),
-                SignaturePadding(sharedPreferences.getString("${keyAlias}$PADDING_TOKEN", "")!!),
+                Digest.valueOf(sharedPreferences.getString("${keyAlias}$DIGEST_TOKEN", "")!!),
+                SignaturePadding.valueOf(sharedPreferences.getString("${keyAlias}$PADDING_TOKEN", "")!!),
                 canonicalTransformation
             )
         }

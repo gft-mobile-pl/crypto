@@ -137,5 +137,5 @@ class DefaultKeyWrapper(
 
 fun String.toCanonicalAlgorithm() = when(this) {
     KeyProperties.KEY_ALGORITHM_EC -> Algorithm.ECDSA
-    else -> Algorithm(this)
+    else -> Algorithm.valueOf(this)
 }

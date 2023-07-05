@@ -15,42 +15,42 @@ import com.gft.crypto.domain.keys.model.UserAuthenticationPolicy
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
-internal fun BlockMode.toNativeBlockMode() = when (this) {
-    BlockMode.ECB -> KeyProperties.BLOCK_MODE_ECB
-    BlockMode.CBC -> KeyProperties.BLOCK_MODE_CBC
-    BlockMode.CTR -> KeyProperties.BLOCK_MODE_CTR
-    BlockMode.GCM -> KeyProperties.BLOCK_MODE_GCM
+internal fun BlockMode.toNativeBlockMode() = when (this.name) {
+    BlockMode.ECB.name -> KeyProperties.BLOCK_MODE_ECB
+    BlockMode.CBC.name -> KeyProperties.BLOCK_MODE_CBC
+    BlockMode.CTR.name -> KeyProperties.BLOCK_MODE_CTR
+    BlockMode.GCM.name -> KeyProperties.BLOCK_MODE_GCM
     else -> throw IllegalArgumentException("Provided block mode is not supported by Android Key Store.")
 }
 
-internal fun Digest.toNativeDigest() = when (this) {
-    Digest.NONE -> KeyProperties.DIGEST_NONE
-    Digest.MD5 -> KeyProperties.DIGEST_MD5
-    Digest.SHA_1 -> KeyProperties.DIGEST_SHA1
-    Digest.SHA_224 -> KeyProperties.DIGEST_SHA224
-    Digest.SHA_256 -> KeyProperties.DIGEST_SHA256
-    Digest.SHA_384 -> KeyProperties.DIGEST_SHA384
-    Digest.SHA_512 -> KeyProperties.DIGEST_SHA512
+internal fun Digest.toNativeDigest() = when (this.name) {
+    Digest.NONE.name -> KeyProperties.DIGEST_NONE
+    Digest.MD5.name -> KeyProperties.DIGEST_MD5
+    Digest.SHA_1.name -> KeyProperties.DIGEST_SHA1
+    Digest.SHA_224.name -> KeyProperties.DIGEST_SHA224
+    Digest.SHA_256.name -> KeyProperties.DIGEST_SHA256
+    Digest.SHA_384.name -> KeyProperties.DIGEST_SHA384
+    Digest.SHA_512.name -> KeyProperties.DIGEST_SHA512
     else -> throw IllegalArgumentException("Provided digest is not supported by Android Key Store.")
 }
 
-internal fun SignaturePadding.toNativePadding() = when (this) {
-    SignaturePadding.NONE -> null
-    SignaturePadding.PKCS1 -> KeyProperties.SIGNATURE_PADDING_RSA_PKCS1
-    SignaturePadding.PSS -> KeyProperties.SIGNATURE_PADDING_RSA_PSS
+internal fun SignaturePadding.toNativePadding() = when (this.name) {
+    SignaturePadding.NONE.name -> null
+    SignaturePadding.PKCS1.name -> KeyProperties.SIGNATURE_PADDING_RSA_PKCS1
+    SignaturePadding.PSS.name -> KeyProperties.SIGNATURE_PADDING_RSA_PSS
     else -> throw IllegalArgumentException("Provided signature padding is not supported by Android Key Store.")
 }
 
-internal fun EncryptionPadding.toNativePadding() = when (this) {
-    EncryptionPadding.NONE -> KeyProperties.ENCRYPTION_PADDING_NONE
-    EncryptionPadding.PKCS1 -> KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1
-    EncryptionPadding.PKCS7 -> KeyProperties.ENCRYPTION_PADDING_PKCS7
-    EncryptionPadding.OAEP,
-    EncryptionPadding.OAEP_SHA_1_MGF1,
-    EncryptionPadding.OAEP_SHA_224_MGF1,
-    EncryptionPadding.OAEP_SHA_256_MGF1,
-    EncryptionPadding.OAEP_SHA_384_MGF1,
-    EncryptionPadding.OAEP_SHA_512_MGF1 -> KeyProperties.ENCRYPTION_PADDING_RSA_OAEP
+internal fun EncryptionPadding.toNativePadding() = when (this.name) {
+    EncryptionPadding.NONE.name -> KeyProperties.ENCRYPTION_PADDING_NONE
+    EncryptionPadding.PKCS1.name -> KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1
+    EncryptionPadding.PKCS7.name -> KeyProperties.ENCRYPTION_PADDING_PKCS7
+    EncryptionPadding.OAEP.name,
+    EncryptionPadding.OAEP_SHA_1_MGF1.name,
+    EncryptionPadding.OAEP_SHA_224_MGF1.name,
+    EncryptionPadding.OAEP_SHA_256_MGF1.name,
+    EncryptionPadding.OAEP_SHA_384_MGF1.name,
+    EncryptionPadding.OAEP_SHA_512_MGF1.name -> KeyProperties.ENCRYPTION_PADDING_RSA_OAEP
 
     else -> throw IllegalArgumentException("Provided encryption padding is not supported by Android Key Store.")
 
@@ -62,15 +62,15 @@ internal fun UnlockPolicy.toUnlockRequired() = when (this) {
     UnlockPolicy.Unknown -> throw IllegalArgumentException("UnlockPolicy.Unknown is not a valid unlock policy.")
 }
 
-internal fun Algorithm.toNativeKeyAlgorithm() = when (this) {
-    Algorithm.AES -> KeyProperties.KEY_ALGORITHM_AES
-    Algorithm.RSA -> KeyProperties.KEY_ALGORITHM_RSA
-    Algorithm.ECDSA -> KeyProperties.KEY_ALGORITHM_EC
-    Algorithm.HMAC_SHA_1 -> KeyProperties.KEY_ALGORITHM_HMAC_SHA1
-    Algorithm.HMAC_SHA_224 -> KeyProperties.KEY_ALGORITHM_HMAC_SHA224
-    Algorithm.HMAC_SHA_256 -> KeyProperties.KEY_ALGORITHM_HMAC_SHA256
-    Algorithm.HMAC_SHA_384 -> KeyProperties.KEY_ALGORITHM_HMAC_SHA384
-    Algorithm.HMAC_SHA_512 -> KeyProperties.KEY_ALGORITHM_HMAC_SHA512
+internal fun Algorithm.toNativeKeyAlgorithm() = when (this.name) {
+    Algorithm.AES.name -> KeyProperties.KEY_ALGORITHM_AES
+    Algorithm.RSA.name -> KeyProperties.KEY_ALGORITHM_RSA
+    Algorithm.ECDSA.name -> KeyProperties.KEY_ALGORITHM_EC
+    Algorithm.HMAC_SHA_1.name -> KeyProperties.KEY_ALGORITHM_HMAC_SHA1
+    Algorithm.HMAC_SHA_224.name -> KeyProperties.KEY_ALGORITHM_HMAC_SHA224
+    Algorithm.HMAC_SHA_256.name -> KeyProperties.KEY_ALGORITHM_HMAC_SHA256
+    Algorithm.HMAC_SHA_384.name -> KeyProperties.KEY_ALGORITHM_HMAC_SHA384
+    Algorithm.HMAC_SHA_512.name -> KeyProperties.KEY_ALGORITHM_HMAC_SHA512
     else -> throw IllegalArgumentException("Provided algorithm is not supported by Android Key Store.")
 }
 
