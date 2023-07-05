@@ -17,9 +17,9 @@ import com.gft.crypto.domain.keys.model.KeyProperties
 import com.gft.crypto.domain.keys.model.KeyStoreCompatibleDataEncryption
 import com.gft.crypto.domain.keys.model.KeyStoreCompatibleKeyWrapping
 import com.gft.crypto.domain.keys.model.KeyStoreCompatibleMessageSigning
-import com.gft.crypto.domain.keys.model.KeyType
 import com.gft.crypto.domain.keys.model.UnlockPolicy
 import com.gft.crypto.domain.keys.model.UserAuthenticationPolicy
+import com.gft.crypto.domain.wrapping.model.WrappedKeyContainer
 import com.gft.crypto.services.CryptoServices
 import com.gft.crypto.services.CryptoServices.keyWrapper
 import com.gft.crypto.services.CryptoServices.keysFactory
@@ -90,10 +90,10 @@ class MainActivity : ComponentActivity() {
                                 println("COMPLETE")
 
                                 print("#Test Wrapping with ${transformation.canonicalTransformation}... ")
-                                val wrappedKey = keyWrapper.wrap(alias, keyToWrap).perform()
+                                val wrappedKey = keyWrapper.wrap(alias, keyToWrap).perform().toString()
                                 println("COMPLETE $wrappedKey")
                                 print("#Test Unwrapping with ${transformation.canonicalTransformation}... ")
-                                val unwrappedKey = keyWrapper.unwrap(alias, wrappedKey, Algorithm.AES, KeyType.SECRET).perform()
+                                val unwrappedKey = keyWrapper.unwrap(alias, WrappedKeyContainer.valueOf(wrappedKey)).perform()
                                 println("COMPLETE ($unwrappedKey)")
                             } catch (e: Throwable) {
                                 println("FAILED")
