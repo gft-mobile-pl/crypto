@@ -115,11 +115,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     Button(onClick = {
-                        CryptoServices.keyStore.aliases().toList().forEach {
-                            println("#Test Deleting key entry... $it")
-                            CryptoServices.keyStore.deleteEntry(it)
-                        }
-
+                        keysRepository.clear()
                     }) {
                         Text(text = "Clear all")
                     }

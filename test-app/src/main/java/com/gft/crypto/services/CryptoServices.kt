@@ -2,11 +2,19 @@ package com.gft.crypto.services
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.security.crypto.EncryptedSharedPreferences
+import com.gft.crypto.domain.common.model.Transformation
+import com.gft.crypto.domain.keys.model.KeyAlias
+import com.gft.crypto.domain.keys.model.KeyProperties
+import com.gft.crypto.domain.keys.model.KeyStoreCompatibleDataEncryption
+import com.gft.crypto.domain.keys.model.UnlockPolicy
+import com.gft.crypto.domain.keys.model.UserAuthenticationPolicy
 import com.gft.crypto.domain.keys.repositories.KeysRepository
 import com.gft.crypto.domain.keys.services.KeysFactory
 import com.gft.crypto.domain.wrapping.services.KeyWrapper
 import com.gft.crypto.framework.keys.repositories.OsBackedKeysRepository
 import com.gft.crypto.framework.keys.services.DefaultKeyPropertiesExtractor
+import com.gft.crypto.framework.storage.services.EncryptedSharedPreferencesProvider
 import com.gft.crypto.framework.wrapping.services.DefaultKeyWrapper
 import java.security.KeyStore
 
@@ -17,7 +25,7 @@ object CryptoServices {
         load(null)
     }
     private val keyPropertiesExtractor = DefaultKeyPropertiesExtractor(keyStore = keyStore)
-    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var sharedPreferencesProvider: EncryptedSharedPreferencesProvider
     lateinit var keysRepository: KeysRepository
     lateinit var keyWrapper: KeyWrapper
     val keysFactory: KeysFactory = KeysFactory()
@@ -27,12 +35,18 @@ object CryptoServices {
         if (initialized) return
         initialized = true
 
-        sharedPreferences = applicationContext.getSharedPreferences("keyRepository", Context.MODE_PRIVATE)
         keysRepository = OsBackedKeysRepository(
             keyStore = keyStore,
             keyPropertiesExtractor = keyPropertiesExtractor,
-            sharedPreferences = sharedPreferences
+            sharedPreferences = EncryptedSharedPreferences.create(
+                "keysRepositoryFileName",
+                "keysRepositoryMasterKey",
+                applicationContext,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
         )
+        sharedPreferencesProvider = EncryptedSharedPreferencesProvider(applicationContext, keysRepository)
         keyWrapper = DefaultKeyWrapper(keysRepository)
     }
 }

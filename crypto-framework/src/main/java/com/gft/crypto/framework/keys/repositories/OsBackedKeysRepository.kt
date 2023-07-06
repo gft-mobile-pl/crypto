@@ -1,5 +1,6 @@
 package com.gft.crypto.framework.keys.repositories
 
+import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import com.gft.crypto.domain.common.model.Algorithm
 import com.gft.crypto.domain.common.model.BlockMode
@@ -22,6 +23,7 @@ import java.security.KeyPairGenerator
 import java.security.KeyStore
 import javax.crypto.KeyGenerator
 
+private const val ALIAS_TOKEN = "_alias"
 private const val ALGORITHM_TOKEN = "_algorithm"
 private const val DIGEST_TOKEN = "_digest"
 private const val PADDING_TOKEN = "_padding"
@@ -82,6 +84,7 @@ open class OsBackedKeysRepository(
         }
 
         sharedPreferences.edit()
+            .putString("${alias.alias}$ALIAS_TOKEN", alias.alias)
             .putString("${alias.alias}$ALGORITHM_TOKEN", keyProperties.supportedTransformation.algorithm.name)
             .putBoolean("${alias.alias}$UNLOCK_REQUIRED_TOKEN", keyProperties.unlockPolicy == UnlockPolicy.Required)
             .putString("${alias.alias}$CANONICAL_TRANSFORMATION_TOKEN", keyProperties.supportedTransformation.canonicalTransformation)
@@ -157,6 +160,7 @@ open class OsBackedKeysRepository(
         if (!keyStore.containsAlias(alias.alias)) return
         keyStore.deleteEntry(alias.alias)
         sharedPreferences.edit()
+            .remove("${alias.alias}$ALIAS_TOKEN")
             .remove("${alias.alias}$ALGORITHM_TOKEN")
             .remove("${alias.alias}$DIGEST_TOKEN")
             .remove("${alias.alias}$BLOCK_MODE_TOKEN")
@@ -167,6 +171,17 @@ open class OsBackedKeysRepository(
     }
 
     override fun containsKey(alias: KeyAlias<*>) = keyStore.containsAlias(alias.alias)
+
+    @SuppressLint("ApplySharedPref")
+    override fun clear() {
+        sharedPreferences.all.forEach { (key, value) ->
+            if (key.contains(ALIAS_TOKEN)) {
+                val alias = value as String
+                deleteKey(KeyAlias<Transformation>(alias))
+            }
+        }
+        sharedPreferences.edit().clear().commit()
+    }
 
     private fun KeyProperties<*>.updateWithDataFromSharedPreferences(keyAlias: String): KeyProperties<*> {
         val algorithm = Algorithm.valueOf(sharedPreferences.getString("${keyAlias}$ALGORITHM_TOKEN", "")!!)

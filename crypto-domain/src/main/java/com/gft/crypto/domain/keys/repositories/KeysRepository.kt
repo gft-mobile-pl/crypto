@@ -25,4 +25,6 @@ interface KeysRepository {
     fun <T> createKey(alias: KeyAlias<KeyWrapping>, properties: KeyProperties<T>) where T : KeyStoreCompatible, T : KeyWrapping
     fun <T> getKey(alias: KeyAlias<T>): Set<KeyContainer<T>> where T : Transformation
     fun deleteKey(alias: KeyAlias<*>)
+
+    fun clear()
 }
