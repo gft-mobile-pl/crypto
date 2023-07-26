@@ -49,13 +49,10 @@ sealed class KeyStoreCompatibleDataEncryption(
     digest: Digest,
     padding: EncryptionPadding
 ) : DataEncryption(algorithm, blockMode, digest, padding), KeyStoreCompatible {
-    object AES_ECB_NoPadding : KeyStoreCompatibleDataEncryption(Algorithm.AES, BlockMode.ECB, Digest.NONE, EncryptionPadding.NONE)
-    object AES_ECB_PKCS7Padding : KeyStoreCompatibleDataEncryption(Algorithm.AES, BlockMode.ECB, Digest.NONE, EncryptionPadding.PKCS7)
     object AES_CBC_NoPadding : KeyStoreCompatibleDataEncryption(Algorithm.AES, BlockMode.CBC, Digest.NONE, EncryptionPadding.NONE)
     object AES_CBC_PKCS7Padding : KeyStoreCompatibleDataEncryption(Algorithm.AES, BlockMode.CBC, Digest.NONE, EncryptionPadding.PKCS7)
     object AES_CTR_NoPadding : KeyStoreCompatibleDataEncryption(Algorithm.AES, BlockMode.CTR, Digest.NONE, EncryptionPadding.NONE)
     object AES_GCM_NoPadding : KeyStoreCompatibleDataEncryption(Algorithm.AES, BlockMode.GCM, Digest.NONE, EncryptionPadding.NONE)
-    object RSA_ECB_NoPadding : KeyStoreCompatibleDataEncryption(Algorithm.RSA, BlockMode.ECB, Digest.NONE, EncryptionPadding.NONE)
     object RSA_ECB_PKCS1Padding : KeyStoreCompatibleDataEncryption(Algorithm.RSA, BlockMode.ECB, Digest.NONE, EncryptionPadding.PKCS1)
     object RSA_ECB_OAEPPadding : KeyStoreCompatibleDataEncryption(Algorithm.RSA, BlockMode.ECB, Digest.SHA_1, EncryptionPadding.OAEP)
     object RSA_ECB_OAEPWithSHA_1AndMGF1Padding : KeyStoreCompatibleDataEncryption(Algorithm.RSA, BlockMode.ECB, Digest.SHA_1, EncryptionPadding.OAEP_SHA_1_MGF1)
@@ -66,8 +63,8 @@ sealed class KeyStoreCompatibleDataEncryption(
     
     companion object {
         fun getAll() = setOf(
-            AES_ECB_NoPadding, AES_ECB_PKCS7Padding, AES_CBC_NoPadding, AES_CBC_PKCS7Padding, AES_CTR_NoPadding, AES_GCM_NoPadding,
-            RSA_ECB_NoPadding, RSA_ECB_PKCS1Padding, RSA_ECB_OAEPPadding, RSA_ECB_OAEPWithSHA_1AndMGF1Padding, RSA_ECB_OAEPWithSHA_224AndMGF1Padding,
+            AES_CBC_NoPadding, AES_CBC_PKCS7Padding, AES_CTR_NoPadding, AES_GCM_NoPadding,
+            RSA_ECB_PKCS1Padding, RSA_ECB_OAEPPadding, RSA_ECB_OAEPWithSHA_1AndMGF1Padding, RSA_ECB_OAEPWithSHA_224AndMGF1Padding,
             RSA_ECB_OAEPWithSHA_256AndMGF1Padding, RSA_ECB_OAEPWithSHA_384AndMGF1Padding, RSA_ECB_OAEPWithSHA_512AndMGF1Padding
         )
     }

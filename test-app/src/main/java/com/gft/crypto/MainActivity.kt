@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.gft.crypto.domain.common.model.Algorithm
 import com.gft.crypto.domain.common.model.Transformation
+import com.gft.crypto.domain.encryption.model.EncryptedData
 import com.gft.crypto.domain.keys.model.KeyAlias
 import com.gft.crypto.domain.keys.model.KeyProperties
 import com.gft.crypto.domain.keys.model.KeyStoreCompatibleDataEncryption
@@ -21,6 +22,7 @@ import com.gft.crypto.domain.keys.model.UnlockPolicy
 import com.gft.crypto.domain.keys.model.UserAuthenticationPolicy
 import com.gft.crypto.domain.wrapping.model.WrappedKeyContainer
 import com.gft.crypto.services.CryptoServices
+import com.gft.crypto.services.CryptoServices.dataCipher
 import com.gft.crypto.services.CryptoServices.keyWrapper
 import com.gft.crypto.services.CryptoServices.keysFactory
 import com.gft.crypto.services.CryptoServices.keysRepository
@@ -66,6 +68,46 @@ class MainActivity : ComponentActivity() {
                         keysRepository.createKey(MessageSigningAlias, MessageSigningProperties)
                     }) {
                         Text(text = "Create keys")
+                    }
+
+                    Button(onClick = {
+                        val message = "Ala ma kota"
+                        val messageBytes = message.toByteArray(Charsets.UTF_8)
+                        var counter = 0
+                        KeyStoreCompatibleDataEncryption.getAll().forEach { transformation ->
+                            counter++
+
+                            val alias = KeyAlias<Transformation.DataEncryption>("encryption_key_$counter")
+                            try {
+                                println("#Test ---------------------------------------------------------------------------")
+                                print("#Test Adding encryption key supporting ${transformation.canonicalTransformation}... ")
+                                keysRepository.createKey(
+                                    alias = alias,
+                                    properties = KeyProperties(
+                                        keySize = if (transformation.algorithm == Algorithm.AES) 256 else 2048,
+                                        unlockPolicy = UnlockPolicy.NotRequired,
+                                        userAuthenticationPolicy = UserAuthenticationPolicy.NotRequired,
+                                        supportedTransformation = transformation
+                                    )
+                                )
+                                println("COMPLETE")
+
+                                print("#Test Encrypting with ${transformation.canonicalTransformation}... ")
+                                val encryptedData = dataCipher.encrypt(alias, messageBytes).perform()
+                                val encryptedDataString = encryptedData.toString()
+                                println("COMPLETE $encryptedDataString")
+                                print("#Test Decrypting with ${transformation.canonicalTransformation}... ")
+                                val decryptedData = dataCipher.decrypt(alias, EncryptedData.valueOf(encryptedDataString)).perform()
+                                println("COMPLETE ($decryptedData)")
+                            } catch (e: Throwable) {
+                                println("FAILED")
+                                println("#Test Error: ${e.message} / ${e.cause?.message}")
+                            }
+
+                            keysRepository.deleteKey(alias)
+                        }
+                    }) {
+                        Text(text = "Encrypt & Decrypt")
                     }
 
                     Button(onClick = {
