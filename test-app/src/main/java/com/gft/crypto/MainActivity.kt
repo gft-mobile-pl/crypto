@@ -11,7 +11,11 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.gft.crypto.domain.common.model.Algorithm
+import com.gft.crypto.domain.common.model.SecureText
 import com.gft.crypto.domain.common.model.Transformation
+import com.gft.crypto.domain.common.model.append
+import com.gft.crypto.domain.common.model.dropLast
+import com.gft.crypto.domain.common.model.replace
 import com.gft.crypto.domain.encryption.model.EncryptedData
 import com.gft.crypto.domain.keys.model.KeyAlias
 import com.gft.crypto.domain.keys.model.KeyProperties
@@ -27,6 +31,9 @@ import com.gft.crypto.services.CryptoServices.keyWrapper
 import com.gft.crypto.services.CryptoServices.keysFactory
 import com.gft.crypto.services.CryptoServices.keysRepository
 import com.gft.crypto.ui.theme.CryptolibraryTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 private val SharedPrefsKeyAlias = KeyAlias<Transformation.DataEncryption>("spkeyalias")
 private val SharedPrefsKeyProperties = KeyProperties(
@@ -56,12 +63,46 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         CryptoServices.init(applicationContext)
 
+        var secureText: SecureText?
+
         super.onCreate(savedInstanceState)
         setContent {
             CryptolibraryTheme {
                 Column(
                     modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    Button(onClick = {
+                        println("#Test SecureText test started")
+                        secureText = SecureText("password".toCharArray())
+                        secureText = SecureText(Char(0))
+                        secureText = secureText?.replace("ala ma kot".toCharArray())
+                        secureText = secureText?.append("X".toCharArray().first())
+                        secureText = secureText?.append("Y".toCharArray().first())
+                        secureText = secureText?.append("Z".toCharArray().first())
+                        secureText = secureText?.dropLast()
+                        println("#Test after append/remove: ${secureText?.text?.contentToString()} / ${secureText?.size}")
+                        secureText?.clear()
+                        println("#Test after clear: ${secureText?.text?.contentToString()} / ${secureText?.size}")
+                        secureText = null
+                    }) {
+                        Text(text = "Test SecureText")
+                    }
+
+                    Button(onClick = {
+                        GlobalScope.launch(Dispatchers.IO) {
+                            var message = "";
+                            var count = 0
+                            for (i in 0..30000) {
+                                message += "Some not so long, not so short text."
+                                count += message.length
+                            }
+                            System.gc()
+                            println("#Test count = $count")
+                        }
+                    }) {
+                        Text(text = "Stress memory")
+                    }
+
                     Button(onClick = {
                         keysRepository.createKey(SharedPrefsKeyAlias, SharedPrefsKeyProperties)
                         keysRepository.createKey(EncryptorKeyAlias, EncryptorKeyProperties)
