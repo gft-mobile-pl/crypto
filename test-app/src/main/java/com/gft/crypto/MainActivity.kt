@@ -118,6 +118,46 @@ class MainActivity : ComponentActivity() {
                     Button(onClick = {
                         val message = "Ala ma kota 1234578901234567890." // 256 bits
                         val messageBytes = message.toByteArray(Charsets.UTF_8)
+                        val transformation = KeyStoreCompatibleDataEncryption.AES_ECB_NoPadding
+                        val alias = KeyAlias<Transformation.DataEncryption>("encryption_key")
+                        try {
+                            println("#Test ---------------------------------------------------------------------------")
+                            print("#Test Adding encryption key supporting ${transformation.canonicalTransformation}... ")
+                            keysRepository.createKey(
+                                alias = alias,
+                                properties = KeyProperties(
+                                    keySize = if (transformation.algorithm == Algorithm.AES) 256 else 2048,
+                                    unlockPolicy = UnlockPolicy.NotRequired,
+                                    userAuthenticationPolicy = UserAuthenticationPolicy.NotRequired,
+                                    randomizationPolicy = RandomizationPolicy.NotRequired,
+                                    supportedTransformation = transformation
+                                )
+                            )
+                            println("COMPLETE")
+
+                            repeat(10) {
+                                print("#Test Encrypting with ${transformation.canonicalTransformation}... ")
+                                val encryptedData = dataCipher.encrypt(alias, messageBytes).perform()
+                                val encryptedDataString = encryptedData.toString()
+                                println("COMPLETE $encryptedDataString")
+                                print("#Test Decrypting with ${transformation.canonicalTransformation}... ")
+                                val decryptedData = dataCipher.decrypt(alias, EncryptedData.valueOf(encryptedDataString)).perform()
+                                println("COMPLETE (${decryptedData.toString(Charsets.UTF_8)})")
+                            }
+                        } catch (e: Throwable) {
+                            println("FAILED")
+                            println("#Test Error: ${e.message} / ${e.cause?.message}")
+                        }
+
+                        keysRepository.deleteKey(alias)
+                    }
+                    ) {
+                        Text(text = "Encryption randomization test")
+                    }
+
+                    Button(onClick = {
+                        val message = "Ala ma kota 1234578901234567890." // 256 bits
+                        val messageBytes = message.toByteArray(Charsets.UTF_8)
                         var counter = 0
                         KeyStoreCompatibleDataEncryption.getAll().forEach { transformation ->
                             counter++
