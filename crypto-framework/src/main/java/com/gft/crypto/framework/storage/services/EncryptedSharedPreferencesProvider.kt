@@ -7,6 +7,7 @@ import com.gft.crypto.domain.common.model.Transformation
 import com.gft.crypto.domain.keys.model.KeyAlias
 import com.gft.crypto.domain.keys.model.KeyProperties
 import com.gft.crypto.domain.keys.model.KeyStoreCompatibleDataEncryption
+import com.gft.crypto.domain.keys.model.RandomizationPolicy
 import com.gft.crypto.domain.keys.model.UnlockPolicy
 import com.gft.crypto.domain.keys.model.UserAuthenticationPolicy
 import com.gft.crypto.domain.keys.repositories.KeysRepository
@@ -23,9 +24,10 @@ class EncryptedSharedPreferencesProvider(
         masterKeyAlias: KeyAlias<Transformation.DataEncryption>,
         unlockPolicy: UnlockPolicy = UnlockPolicy.NotRequired,
         userAuthenticationPolicy: UserAuthenticationPolicy = UserAuthenticationPolicy.NotRequired,
+        randomizationPolicy: RandomizationPolicy = RandomizationPolicy.Required,
         recreateCorruptedSharedPreferences: Boolean = false
     ): SharedPreferences {
-        initMasterKey(masterKeyAlias, unlockPolicy, userAuthenticationPolicy)
+        initMasterKey(masterKeyAlias, unlockPolicy, userAuthenticationPolicy, randomizationPolicy)
 
         try {
             return createEncryptedSharedPreferences(applicationContext, fileName, masterKeyAlias)
@@ -39,7 +41,8 @@ class EncryptedSharedPreferencesProvider(
     private fun initMasterKey(
         masterKeyAlias: KeyAlias<Transformation.DataEncryption>,
         unlockPolicy: UnlockPolicy,
-        userAuthenticationPolicy: UserAuthenticationPolicy
+        userAuthenticationPolicy: UserAuthenticationPolicy,
+        randomizationPolicy: RandomizationPolicy
     ) {
         if (keysRepository.containsKey(masterKeyAlias)) return
 
@@ -47,6 +50,7 @@ class EncryptedSharedPreferencesProvider(
             keySize = DEFAULT_AES_KEY_SIZE,
             unlockPolicy = unlockPolicy,
             userAuthenticationPolicy = userAuthenticationPolicy,
+            randomizationPolicy = randomizationPolicy,
             supportedTransformation = KeyStoreCompatibleDataEncryption.AES_GCM_NoPadding
         )
         keysRepository.createKey(masterKeyAlias, keyProperties)

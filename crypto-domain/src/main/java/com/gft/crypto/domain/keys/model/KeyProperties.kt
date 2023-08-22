@@ -7,6 +7,7 @@ data class KeyProperties<SupportedTransformation : Transformation>(
     val keySize: Int,
     val unlockPolicy: UnlockPolicy,
     val userAuthenticationPolicy: UserAuthenticationPolicy,
+    val randomizationPolicy: RandomizationPolicy,
     val supportedTransformation: SupportedTransformation
 )
 
@@ -15,6 +16,12 @@ sealed interface UserAuthenticationPolicy {
     object RequiredAfterBoot : UserAuthenticationPolicy
     object BiometricAuthenticationRequiredOnEachUse : UserAuthenticationPolicy
     data class Required(val timeout: Duration) : UserAuthenticationPolicy
+}
+
+sealed interface RandomizationPolicy {
+    object Required : RandomizationPolicy
+    object NotRequired : RandomizationPolicy
+    object Unknown : RandomizationPolicy
 }
 
 sealed interface UnlockPolicy {

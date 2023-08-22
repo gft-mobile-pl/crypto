@@ -22,6 +22,7 @@ import com.gft.crypto.domain.keys.model.KeyProperties
 import com.gft.crypto.domain.keys.model.KeyStoreCompatibleDataEncryption
 import com.gft.crypto.domain.keys.model.KeyStoreCompatibleKeyWrapping
 import com.gft.crypto.domain.keys.model.KeyStoreCompatibleMessageSigning
+import com.gft.crypto.domain.keys.model.RandomizationPolicy
 import com.gft.crypto.domain.keys.model.UnlockPolicy
 import com.gft.crypto.domain.keys.model.UserAuthenticationPolicy
 import com.gft.crypto.domain.wrapping.model.WrappedKeyContainer
@@ -40,6 +41,7 @@ private val SharedPrefsKeyProperties = KeyProperties(
     keySize = 256,
     unlockPolicy = UnlockPolicy.Required,
     userAuthenticationPolicy = UserAuthenticationPolicy.NotRequired,
+    randomizationPolicy = RandomizationPolicy.Required,
     supportedTransformation = KeyStoreCompatibleDataEncryption.AES_GCM_NoPadding
 )
 
@@ -48,6 +50,7 @@ private val EncryptorKeyProperties = KeyProperties(
     keySize = 2048,
     unlockPolicy = UnlockPolicy.Required,
     userAuthenticationPolicy = UserAuthenticationPolicy.NotRequired,
+    randomizationPolicy = RandomizationPolicy.Required,
     supportedTransformation = KeyStoreCompatibleDataEncryption.RSA_ECB_PKCS1Padding
 )
 
@@ -56,6 +59,7 @@ private val MessageSigningProperties = KeyProperties(
     keySize = 2048,
     unlockPolicy = UnlockPolicy.NotRequired,
     userAuthenticationPolicy = UserAuthenticationPolicy.NotRequired,
+    randomizationPolicy = RandomizationPolicy.Required,
     supportedTransformation = KeyStoreCompatibleMessageSigning.SHA512_RSA
 )
 
@@ -112,7 +116,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     Button(onClick = {
-                        val message = "Ala ma kota"
+                        val message = "Ala ma kota 1234578901234567890." // 256 bits
                         val messageBytes = message.toByteArray(Charsets.UTF_8)
                         var counter = 0
                         KeyStoreCompatibleDataEncryption.getAll().forEach { transformation ->
@@ -128,6 +132,7 @@ class MainActivity : ComponentActivity() {
                                         keySize = if (transformation.algorithm == Algorithm.AES) 256 else 2048,
                                         unlockPolicy = UnlockPolicy.NotRequired,
                                         userAuthenticationPolicy = UserAuthenticationPolicy.NotRequired,
+                                        randomizationPolicy = RandomizationPolicy.NotRequired,
                                         supportedTransformation = transformation
                                     )
                                 )
@@ -139,7 +144,7 @@ class MainActivity : ComponentActivity() {
                                 println("COMPLETE $encryptedDataString")
                                 print("#Test Decrypting with ${transformation.canonicalTransformation}... ")
                                 val decryptedData = dataCipher.decrypt(alias, EncryptedData.valueOf(encryptedDataString)).perform()
-                                println("COMPLETE ($decryptedData)")
+                                println("COMPLETE (${decryptedData.toString(Charsets.UTF_8)})")
                             } catch (e: Throwable) {
                                 println("FAILED")
                                 println("#Test Error: ${e.message} / ${e.cause?.message}")
@@ -167,6 +172,7 @@ class MainActivity : ComponentActivity() {
                                         keySize = if (transformation.algorithm == Algorithm.AES) 256 else 2048,
                                         unlockPolicy = UnlockPolicy.NotRequired,
                                         userAuthenticationPolicy = UserAuthenticationPolicy.NotRequired,
+                                        randomizationPolicy = RandomizationPolicy.NotRequired,
                                         supportedTransformation = transformation
                                     )
                                 )

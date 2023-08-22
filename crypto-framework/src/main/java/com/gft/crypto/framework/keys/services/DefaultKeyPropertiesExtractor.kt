@@ -9,6 +9,7 @@ import com.gft.crypto.domain.common.model.SignaturePadding
 import com.gft.crypto.domain.common.model.Transformation
 import com.gft.crypto.domain.keys.model.KeyProperties
 import com.gft.crypto.domain.keys.model.KeyPurpose
+import com.gft.crypto.domain.keys.model.RandomizationPolicy
 import com.gft.crypto.domain.keys.model.UnlockPolicy
 import com.gft.crypto.domain.keys.model.UserAuthenticationPolicy
 import com.gft.crypto.domain.keys.services.KeyPropertiesExtractor
@@ -41,6 +42,7 @@ class DefaultKeyPropertiesExtractor(
                 } else {
                     UserAuthenticationPolicy.NotRequired
                 },
+                randomizationPolicy = RandomizationPolicy.Unknown,
                 supportedTransformation = when (keyPurposes.first()) {
                     KeyPurpose.Decryption, KeyPurpose.Encryption -> Transformation.DataEncryption(
                         algorithm = key.algorithm.toKeyAlgorithm(),

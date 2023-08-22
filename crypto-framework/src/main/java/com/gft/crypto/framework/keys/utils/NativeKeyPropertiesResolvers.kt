@@ -10,6 +10,7 @@ import com.gft.crypto.domain.common.model.Digest
 import com.gft.crypto.domain.common.model.EncryptionPadding
 import com.gft.crypto.domain.common.model.SignaturePadding
 import com.gft.crypto.domain.common.model.Transformation
+import com.gft.crypto.domain.keys.model.RandomizationPolicy
 import com.gft.crypto.domain.keys.model.UnlockPolicy
 import com.gft.crypto.domain.keys.model.UserAuthenticationPolicy
 import kotlin.time.Duration
@@ -152,5 +153,6 @@ internal fun com.gft.crypto.domain.keys.model.KeyProperties<*>.toKeyGenParameter
             }
         }
         setUnlockedDeviceRequired(unlockPolicy.toUnlockRequired())
+        setRandomizedEncryptionRequired(randomizationPolicy == RandomizationPolicy.Required)
     }
     .build()

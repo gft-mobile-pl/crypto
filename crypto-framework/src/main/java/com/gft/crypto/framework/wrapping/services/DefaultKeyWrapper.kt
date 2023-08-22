@@ -6,17 +6,18 @@ import com.gft.crypto.domain.common.model.BlockMode
 import com.gft.crypto.domain.common.model.CryptographicOperation
 import com.gft.crypto.domain.common.model.EncryptionPadding
 import com.gft.crypto.domain.common.model.Transformation
+import com.gft.crypto.domain.encryption.model.IvParam
 import com.gft.crypto.domain.keys.model.KeyAlias
 import com.gft.crypto.domain.keys.model.KeyType
 import com.gft.crypto.domain.keys.repositories.KeysRepository
 import com.gft.crypto.domain.wrapping.model.WrappedKeyContainer
 import com.gft.crypto.domain.wrapping.services.KeyWrapper
 import com.gft.crypto.framework.keys.utils.toNativeKeyAlgorithm
+import java.io.Serializable
 import java.security.Key
 import java.security.PrivateKey
 import java.security.PublicKey
 import java.security.spec.MGF1ParameterSpec
-import java.util.Base64
 import javax.crypto.Cipher
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
@@ -51,11 +52,7 @@ class DefaultKeyWrapper(
                 wrappedKeyBytes = wrappedKeyBytes,
                 wrappedKeyAlgorithm = key.algorithm.toCanonicalAlgorithm(),
                 wrappedKeyType = KeyType.valueOf(keyToWrap),
-                wrappingAlgorithmParams = if (transformation.algorithm == Algorithm.AES) {
-                    Base64.getEncoder().encodeToString(processor.iv)
-                } else {
-                    null
-                }
+                wrappingAlgorithmParams = processor.iv?.let { iv -> IvParam(iv) }
             )
         }
     }
@@ -83,28 +80,27 @@ class DefaultKeyWrapper(
             key = key,
             transformation = transformation,
             mode = Cipher.UNWRAP_MODE,
-            iv = if (transformation.algorithm == Algorithm.AES) {
-                Base64.getDecoder().decode(wrappedKeyData.wrappingAlgorithmParams!!)
-            } else {
-                null
-            }
+            params = wrappedKeyData.wrappingAlgorithmParams
         )
 
         override fun perform(): Key = processor.unwrap(
             wrappedKeyData.wrappedKeyBytes,
             wrappedKeyData.wrappedKeyAlgorithm.toNativeKeyAlgorithm(),
-            wrappedKeyData.wrappedKeyType.toCipherType())
+            wrappedKeyData.wrappedKeyType.toCipherType()
+        )
     }
 
-    private fun createCipher(key: Key, transformation: Transformation.KeyWrapping, mode: Int, iv: ByteArray?): Cipher {
+    private fun createCipher(key: Key, transformation: Transformation.KeyWrapping, mode: Int, params: Serializable?): Cipher {
         val cipher = Cipher.getInstance(transformation.canonicalTransformation)
             .apply {
-                val parameterSpec = iv?.let {
-                    when (transformation.blockMode) {
-                        BlockMode.GCM -> GCMParameterSpec(AUTH_TAG_LENGTH, iv)
-                        BlockMode.CBC, BlockMode.CTR -> IvParameterSpec(iv)
+                val parameterSpec = when (params) {
+                    is IvParam -> when (transformation.blockMode) {
+                        BlockMode.GCM -> GCMParameterSpec(AUTH_TAG_LENGTH, params.iv)
+                        BlockMode.CBC, BlockMode.CTR -> IvParameterSpec(params.iv)
                         else -> throw IllegalArgumentException("Using IV with ${transformation.blockMode} is not supported.")
                     }
+
+                    else -> null
                 }
                 if (parameterSpec != null) init(mode, key, parameterSpec)
                 else init(mode, key)
@@ -135,7 +131,7 @@ class DefaultKeyWrapper(
     }
 }
 
-fun String.toCanonicalAlgorithm() = when(this) {
+fun String.toCanonicalAlgorithm() = when (this) {
     KeyProperties.KEY_ALGORITHM_EC -> Algorithm.ECDSA
     else -> Algorithm.valueOf(this)
 }

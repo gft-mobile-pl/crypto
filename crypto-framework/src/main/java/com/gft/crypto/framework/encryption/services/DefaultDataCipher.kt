@@ -1,6 +1,5 @@
 package com.gft.crypto.framework.encryption.services
 
-import com.gft.crypto.domain.common.model.Algorithm
 import com.gft.crypto.domain.common.model.BlockMode
 import com.gft.crypto.domain.common.model.CryptographicOperation
 import com.gft.crypto.domain.common.model.EncryptionPadding
@@ -50,7 +49,7 @@ class DefaultDataCipher(
             val encryptedBytes = processor.doFinal(data)
             return EncryptedData(
                 data = encryptedBytes,
-                algorithmParams = if (transformation.algorithm == Algorithm.AES) IvParam(processor.iv) else null
+                algorithmParams = processor.iv?.let { iv -> IvParam(iv) }
             )
         }
     }

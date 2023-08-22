@@ -12,6 +12,7 @@ import com.gft.crypto.domain.keys.model.KeyAlias
 import com.gft.crypto.domain.keys.model.KeyContainer
 import com.gft.crypto.domain.keys.model.KeyProperties
 import com.gft.crypto.domain.keys.model.KeyStoreCompatible
+import com.gft.crypto.domain.keys.model.RandomizationPolicy
 import com.gft.crypto.domain.keys.model.UnlockPolicy
 import com.gft.crypto.domain.keys.model.UserAuthenticationPolicy
 import com.gft.crypto.domain.keys.repositories.KeysRepository
@@ -30,6 +31,7 @@ private const val PADDING_TOKEN = "_padding"
 private const val BLOCK_MODE_TOKEN = "_block_mode"
 private const val CANONICAL_TRANSFORMATION_TOKEN = "_canonical_transformation"
 private const val UNLOCK_REQUIRED_TOKEN = "_unlock_required"
+private const val RANDOMIZATION_REQUIRED_TOKEN = "_randomization_policy"
 
 open class OsBackedKeysRepository(
     private val keyStore: KeyStore,
@@ -88,6 +90,7 @@ open class OsBackedKeysRepository(
             .putString("${alias.alias}$ALGORITHM_TOKEN", keyProperties.supportedTransformation.algorithm.name)
             .putBoolean("${alias.alias}$UNLOCK_REQUIRED_TOKEN", keyProperties.unlockPolicy == UnlockPolicy.Required)
             .putString("${alias.alias}$CANONICAL_TRANSFORMATION_TOKEN", keyProperties.supportedTransformation.canonicalTransformation)
+            .putBoolean("${alias.alias}$RANDOMIZATION_REQUIRED_TOKEN", keyProperties.randomizationPolicy == RandomizationPolicy.Required)
             .apply {
                 when (val transformation = keyProperties.supportedTransformation) {
                     is Transformation.DataEncryption -> {
@@ -167,6 +170,7 @@ open class OsBackedKeysRepository(
             .remove("${alias.alias}$PADDING_TOKEN")
             .remove("${alias.alias}$CANONICAL_TRANSFORMATION_TOKEN")
             .remove("${alias.alias}$UNLOCK_REQUIRED_TOKEN")
+            .remove("${alias.alias}$RANDOMIZATION_REQUIRED_TOKEN")
             .apply()
     }
 
@@ -187,6 +191,8 @@ open class OsBackedKeysRepository(
         val algorithm = Algorithm.valueOf(sharedPreferences.getString("${keyAlias}$ALGORITHM_TOKEN", "")!!)
         val unlockPolicy = sharedPreferences.getBoolean("${keyAlias}$UNLOCK_REQUIRED_TOKEN", false)
             .let { required -> if (required) UnlockPolicy.Required else UnlockPolicy.NotRequired }
+        val randomizationPolicy = sharedPreferences.getBoolean("${keyAlias}$RANDOMIZATION_REQUIRED_TOKEN", false)
+            .let { required -> if (required) RandomizationPolicy.Required else RandomizationPolicy.NotRequired }
         val canonicalTransformation = sharedPreferences.getString("${keyAlias}$CANONICAL_TRANSFORMATION_TOKEN", "")!!
         val effectiveTransformation = when (supportedTransformation) {
             is Transformation.DataEncryption -> {
@@ -217,6 +223,7 @@ open class OsBackedKeysRepository(
         @Suppress("UNCHECKED_CAST")
         return (this as KeyProperties<Transformation>).copy(
             unlockPolicy = unlockPolicy,
+            randomizationPolicy = randomizationPolicy,
             supportedTransformation = effectiveTransformation
         )
     }
