@@ -31,10 +31,12 @@ import com.gft.crypto.services.CryptoServices.dataCipher
 import com.gft.crypto.services.CryptoServices.keyWrapper
 import com.gft.crypto.services.CryptoServices.keysFactory
 import com.gft.crypto.services.CryptoServices.keysRepository
+import com.gft.crypto.services.CryptoServices.pinBlockGenerator
 import com.gft.crypto.ui.theme.CryptolibraryTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import javax.crypto.SecretKey
 
 private val SharedPrefsKeyAlias = KeyAlias<Transformation.DataEncryption>("spkeyalias")
 private val SharedPrefsKeyProperties = KeyProperties(
@@ -247,6 +249,20 @@ class MainActivity : ComponentActivity() {
                         keysRepository.clear()
                     }) {
                         Text(text = "Clear all")
+                    }
+
+                    Button(onClick = {
+                        println("#Test ---------------------------------------------------------------------------")
+                        val pin = SecureText("1234".toCharArray())
+                        val pan = SecureText("432198765432109870".toCharArray())
+                        val transformation = KeyStoreCompatibleDataEncryption.AES_ECB_NoPadding
+                        val encryptionKey = keysFactory.generateKey(128, transformation).first() as SecretKey
+                        val encipheredPinBlock = pinBlockGenerator.generate(encryptionKey, transformation, pin, pan)
+                        println("#Test encryptedPinBlock = ${encipheredPinBlock.pinBlock}")
+                        println("#Test encryptionKey = ${encipheredPinBlock.encryptionKey.encoded.toString(Charsets.UTF_8)}")
+                        println("#Test ---------------------------------------------------------------------------")
+                    }) {
+                        Text(text = "Generate Pin")
                     }
                 }
             }

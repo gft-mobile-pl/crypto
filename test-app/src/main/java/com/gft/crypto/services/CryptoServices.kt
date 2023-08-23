@@ -1,17 +1,11 @@
 package com.gft.crypto.services
 
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
-import com.gft.crypto.domain.common.model.Transformation
 import com.gft.crypto.domain.encryption.services.DataCipher
-import com.gft.crypto.domain.keys.model.KeyAlias
-import com.gft.crypto.domain.keys.model.KeyProperties
-import com.gft.crypto.domain.keys.model.KeyStoreCompatibleDataEncryption
-import com.gft.crypto.domain.keys.model.UnlockPolicy
-import com.gft.crypto.domain.keys.model.UserAuthenticationPolicy
 import com.gft.crypto.domain.keys.repositories.KeysRepository
 import com.gft.crypto.domain.keys.services.KeysFactory
+import com.gft.crypto.domain.pin.services.PinBlockGenerator
 import com.gft.crypto.domain.wrapping.services.KeyWrapper
 import com.gft.crypto.framework.encryption.services.DefaultDataCipher
 import com.gft.crypto.framework.keys.repositories.OsBackedKeysRepository
@@ -31,6 +25,7 @@ object CryptoServices {
     lateinit var keysRepository: KeysRepository
     lateinit var keyWrapper: KeyWrapper
     lateinit var dataCipher: DataCipher
+    lateinit var pinBlockGenerator: PinBlockGenerator
     val keysFactory: KeysFactory = KeysFactory()
 
     @Synchronized
@@ -52,5 +47,6 @@ object CryptoServices {
         sharedPreferencesProvider = EncryptedSharedPreferencesProvider(applicationContext, keysRepository)
         keyWrapper = DefaultKeyWrapper(keysRepository)
         dataCipher = DefaultDataCipher(keysRepository)
+        pinBlockGenerator = PinBlockGenerator(dataCipher)
     }
 }
