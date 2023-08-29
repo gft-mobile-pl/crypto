@@ -29,49 +29,66 @@ class PinBlockGenerator(
         return EncipheredPinBlock(encryptionResult.toString(), key)
     }
 
-    private fun preparePinBlock(pin: SecureText): ByteArray = ByteArray(BLOCK_SIZE)
-        .apply {
+    private fun preparePinBlock(pin: SecureText): ByteArray {
+        val blockData = IntArray(BLOCK_SIZE).apply {
             var index = 0
-            this[index] = PIN_BLOCK_ISO_VERSION_NUMBER.toByte()
+            this[index] = PIN_BLOCK_ISO_VERSION_NUMBER
             index++
-            this[index] = pin.size.toByte()
+            this[index] = pin.size
             index++
             pin.text.forEach { digit ->
-                this[index] = digit.digitToInt().toByte()
+                this[index] = digit.digitToInt()
                 index++
             }
             while (index < PIN_BLOCK_START_RANDOM_VALUES_INDEX) {
-                this[index] = PIN_BLOCK_PADDING_A.toByte()
+                this[index] = PIN_BLOCK_PADDING_A
                 index++
             }
             val random = SecureRandom.getInstanceStrong()
             val randomValues = ByteArray(BLOCK_SIZE - index)
             random.nextBytes(randomValues)
             randomValues.forEach { byte ->
-                this[index] = byte
+                this[index] = byte.toInt()
                 index++
             }
+        }
+        return blockData.to4BitsArray()
+    }
+
+    private fun preparePanBlock(pan: SecureText): ByteArray {
+        val blockData = IntArray(BLOCK_SIZE)
+            .apply {
+                var index = 0
+                this[0] = when {
+                    pan.size < PAN_BLOCK_STANDARD_SIZE -> PAN_BLOCK_STANDARD_SIZE_VALUE
+                    else -> pan.size - PAN_BLOCK_STANDARD_SIZE
+                }
+                index++
+                while (index <= PAN_BLOCK_STANDARD_SIZE - pan.size) {
+                    this[index] = PAN_BLOCK_PADDING_0
+                    index++
+                }
+                pan.text.forEach { digit ->
+                    this[index] = digit.digitToInt()
+                    index++
+                }
+                while (index < BLOCK_SIZE) {
+                    this[index] = PAN_BLOCK_PADDING_0
+                    index++
+                }
+            }
+        return blockData.to4BitsArray()
+    }
+
+    private fun IntArray.to4BitsArray(): ByteArray {
+        val result = ByteArray(size / 2)
+
+        for ((destIndex, srcIndex) in (indices step 2).withIndex()) {
+            result[destIndex] = ((this[srcIndex] shl 4) or this[srcIndex + 1]).toByte()
+            this[srcIndex] = 0
+            this[srcIndex + 1] = 0
         }
 
-    private fun preparePanBlock(pan: SecureText): ByteArray = ByteArray(BLOCK_SIZE)
-        .apply {
-            var index = 0
-            this[0] = when {
-                pan.size < PAN_BLOCK_STANDARD_SIZE -> PAN_BLOCK_STANDARD_SIZE_VALUE
-                else -> pan.size - PAN_BLOCK_STANDARD_SIZE
-            }.toByte()
-            index++
-            while (index <= PAN_BLOCK_STANDARD_SIZE - pan.size) {
-                this[index] = PAN_BLOCK_PADDING_0.toByte()
-                index++
-            }
-            pan.text.forEach { digit ->
-                this[index] = digit.digitToInt().toByte()
-                index++
-            }
-            while (index < BLOCK_SIZE) {
-                this[index] = PAN_BLOCK_PADDING_0.toByte()
-                index++
-            }
-        }
+        return result
+    }
 }
