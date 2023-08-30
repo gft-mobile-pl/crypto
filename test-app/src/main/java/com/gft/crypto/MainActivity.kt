@@ -20,6 +20,7 @@ import com.gft.crypto.domain.encryption.model.EncryptedData
 import com.gft.crypto.domain.keys.model.KeyAlias
 import com.gft.crypto.domain.keys.model.KeyProperties
 import com.gft.crypto.domain.keys.model.KeyStoreCompatibleDataEncryption
+import com.gft.crypto.domain.keys.model.KeyStoreCompatibleDataEncryption.RSA_ECB_PKCS1Padding
 import com.gft.crypto.domain.keys.model.KeyStoreCompatibleKeyWrapping
 import com.gft.crypto.domain.keys.model.KeyStoreCompatibleMessageSigning
 import com.gft.crypto.domain.keys.model.RandomizationPolicy
@@ -31,6 +32,7 @@ import com.gft.crypto.services.CryptoServices.dataCipher
 import com.gft.crypto.services.CryptoServices.keyWrapper
 import com.gft.crypto.services.CryptoServices.keysFactory
 import com.gft.crypto.services.CryptoServices.keysRepository
+import com.gft.crypto.services.CryptoServices.parser
 import com.gft.crypto.services.CryptoServices.pinBlockGenerator
 import com.gft.crypto.ui.theme.CryptolibraryTheme
 import kotlinx.coroutines.Dispatchers
@@ -53,7 +55,7 @@ private val EncryptorKeyProperties = KeyProperties(
     unlockPolicy = UnlockPolicy.Required,
     userAuthenticationPolicy = UserAuthenticationPolicy.NotRequired,
     randomizationPolicy = RandomizationPolicy.Required,
-    supportedTransformation = KeyStoreCompatibleDataEncryption.RSA_ECB_PKCS1Padding
+    supportedTransformation = RSA_ECB_PKCS1Padding
 )
 
 private val MessageSigningAlias = KeyAlias<Transformation.MessageSigning>("messagesigningalias")
@@ -263,6 +265,26 @@ class MainActivity : ComponentActivity() {
                         println("#Test ---------------------------------------------------------------------------")
                     }) {
                         Text(text = "Generate Pin")
+                    }
+
+                    Button(onClick = {
+                        println("#Test ---------------------------------------------------------------------------")
+                        val textToEncrypt = "Test".toByteArray()
+                        val publicKeyPem = """-----BEGIN PUBLIC KEY-----
+                            MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuwG1czeb1jftfP276SgD
+                            /Cpeof0ikosJxBt+ZjK65UMNV8gwI4MSGOswW50fngvF4tsvw8EXpitTgCDtPMC4
+                            oTmTHIQviBcn2ryIOoX9sZJC0joJZuF93KmFIqdaXzt1FRg6Iu4SGO62h3S+2PP7
+                            AVlFjKhaJ84DkAhj2+qlj54DH7oe8EO63gMsNdE1i/1HvF84HrE20mxAatqWgV8f
+                            VCRzWky9bFUindzGNbl5krTDMZAq56I9NA4VTNnjBQ/RXWqd5fszvIJhIzlIpXpD
+                            5uY9PwceH1g3cmMWqjRfXrbqxgojK/ce/XMdwIEqV4qYzx9DieIkE6hwAA1WJ0a/
+                            IwIDAQAB
+                            -----END PUBLIC KEY-----"""
+                        val publicKey = parser.parse(publicKeyPem, Algorithm.RSA)
+                        val encryptedData = dataCipher.encrypt(publicKey, RSA_ECB_PKCS1Padding, textToEncrypt).perform()
+                        println("#Test encryptedData = ${encryptedData.data}")
+                        println("#Test ---------------------------------------------------------------------------")
+                    }) {
+                        Text(text = "Parse Public Key")
                     }
                 }
             }
