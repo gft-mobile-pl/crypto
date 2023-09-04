@@ -260,8 +260,8 @@ class MainActivity : ComponentActivity() {
                         val transformation = KeyStoreCompatibleDataEncryption.AES_ECB_NoPadding
                         val encryptionKey = keysFactory.generateKey(128, transformation).first() as SecretKey
                         val encipheredPinBlock = pinBlockGenerator.generate(encryptionKey, transformation, pin, pan)
-                        println("#Test encryptedPinBlock = ${encipheredPinBlock.pinBlock}")
-                        println("#Test encryptionKey = ${encipheredPinBlock.encryptionKey.encoded.toString(Charsets.UTF_8)}")
+                        println("#Test encryptedPinBlock = ${String(encipheredPinBlock, Charsets.UTF_8)}")
+                        println("#Test encryptionKey = ${String(encryptionKey.encoded, Charsets.UTF_8)}")
                         println("#Test ---------------------------------------------------------------------------")
                     }) {
                         Text(text = "Generate Pin")

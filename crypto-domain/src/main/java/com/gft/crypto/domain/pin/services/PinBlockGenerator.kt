@@ -4,7 +4,6 @@ import com.gft.crypto.domain.common.model.SecureText
 import com.gft.crypto.domain.common.model.Transformation.DataEncryption
 import com.gft.crypto.domain.common.utils.xor
 import com.gft.crypto.domain.encryption.services.DataCipher
-import com.gft.crypto.domain.pin.model.EncipheredPinBlock
 import java.security.SecureRandom
 import javax.crypto.SecretKey
 
@@ -20,13 +19,12 @@ class PinBlockGenerator(
     private val dataCipher: DataCipher
 ) {
 
-    fun generate(key: SecretKey, transformation: DataEncryption, pin: SecureText, pan: SecureText): EncipheredPinBlock {
+    fun generate(key: SecretKey, transformation: DataEncryption, pin: SecureText, pan: SecureText): ByteArray {
         val pinBlock = preparePinBlock(pin)
         val panBlock = preparePanBlock(pan)
         val intermediateBlockA = dataCipher.encrypt(key, transformation, pinBlock).perform().data
         val intermediateBlockB = intermediateBlockA.xor(panBlock)
-        val encryptionResult = dataCipher.encrypt(key, transformation, intermediateBlockB).perform()
-        return EncipheredPinBlock(encryptionResult.toString(), key)
+        return dataCipher.encrypt(key, transformation, intermediateBlockB).perform().data
     }
 
     private fun preparePinBlock(pin: SecureText): ByteArray {
