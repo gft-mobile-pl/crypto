@@ -140,12 +140,6 @@ internal fun com.gft.crypto.domain.keys.model.KeyProperties<*>.toKeyGenParameter
 
             is UserAuthenticationPolicy.BiometricAuthenticationRequiredOnEachUse -> {
                 setUserAuthenticationRequired(true)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    setUserAuthenticationParameters(0, KeyProperties.AUTH_BIOMETRIC_STRONG)
-                } else {
-                    @Suppress("DEPRECATION")
-                    setUserAuthenticationValidityDurationSeconds(-1)
-                }
             }
 
             UserAuthenticationPolicy.NotRequired -> {

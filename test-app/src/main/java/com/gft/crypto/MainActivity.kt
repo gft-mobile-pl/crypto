@@ -35,6 +35,7 @@ import com.gft.crypto.services.CryptoServices.keysRepository
 import com.gft.crypto.services.CryptoServices.parser
 import com.gft.crypto.services.CryptoServices.pinBlockGenerator
 import com.gft.crypto.ui.theme.CryptolibraryTheme
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -67,7 +68,17 @@ private val MessageSigningProperties = KeyProperties(
     supportedTransformation = KeyStoreCompatibleMessageSigning.SHA512_RSA
 )
 
+private val BiometricEncryptionKeyAlias = KeyAlias<Transformation.DataEncryption>("biometricencryptionalias")
+private val BiometricEncryptionKeyProperties = KeyProperties(
+    keySize = 2048,
+    unlockPolicy = UnlockPolicy.NotRequired,
+    userAuthenticationPolicy = UserAuthenticationPolicy.BiometricAuthenticationRequiredOnEachUse,
+    randomizationPolicy = RandomizationPolicy.Required,
+    supportedTransformation = KeyStoreCompatibleDataEncryption.RSA_ECB_OAEPPadding
+)
+
 class MainActivity : ComponentActivity() {
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         CryptoServices.init(applicationContext)
 
@@ -98,7 +109,7 @@ class MainActivity : ComponentActivity() {
 
                     Button(onClick = {
                         GlobalScope.launch(Dispatchers.IO) {
-                            var message = "";
+                            var message = ""
                             var count = 0
                             for (i in 0..30000) {
                                 message += "Some not so long, not so short text."
@@ -115,6 +126,7 @@ class MainActivity : ComponentActivity() {
                         keysRepository.createKey(SharedPrefsKeyAlias, SharedPrefsKeyProperties)
                         keysRepository.createKey(EncryptorKeyAlias, EncryptorKeyProperties)
                         keysRepository.createKey(MessageSigningAlias, MessageSigningProperties)
+                        keysRepository.createKey(BiometricEncryptionKeyAlias, BiometricEncryptionKeyProperties)
                     }) {
                         Text(text = "Create keys")
                     }
@@ -243,6 +255,7 @@ class MainActivity : ComponentActivity() {
                         println("#Test SharedPrefsKeyAlias = ${keysRepository.getKey(SharedPrefsKeyAlias)}")
                         println("#Test EncryptorKeyAlias = ${keysRepository.getKey(EncryptorKeyAlias)}")
                         println("#Test MessageSigningAlias = ${keysRepository.getKey(MessageSigningAlias)}")
+                        println("#Test BiometricEncryptionKeyAlias = ${keysRepository.getKey(BiometricEncryptionKeyAlias)}")
                     }) {
                         Text(text = "Get keys")
                     }
