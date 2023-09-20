@@ -92,7 +92,9 @@ internal fun com.gft.crypto.domain.keys.model.KeyProperties<*>.toKeyGenParameter
         when (val transformation = supportedTransformation) {
             is Transformation.MessageSigning -> {
                 setDigests(transformation.digest.toNativeDigest())
-                setSignaturePaddings(transformation.padding.toNativePadding())
+                if (transformation.padding != SignaturePadding.NONE) {
+                    setSignaturePaddings(transformation.padding.toNativePadding())
+                }
             }
 
             is Transformation.DataEncryption -> {
@@ -100,6 +102,7 @@ internal fun com.gft.crypto.domain.keys.model.KeyProperties<*>.toKeyGenParameter
                 setDigests(transformation.digest.toNativeDigest())
                 setEncryptionPaddings(transformation.padding.toNativePadding())
             }
+
             is Transformation.KeyWrapping -> {
                 setBlockModes(transformation.blockMode.toNativeBlockMode())
                 setDigests(transformation.digest.toNativeDigest())

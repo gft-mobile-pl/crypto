@@ -5,7 +5,6 @@ import com.gft.crypto.domain.common.model.BlockMode
 import com.gft.crypto.domain.common.model.Digest
 import com.gft.crypto.domain.common.model.EncryptionPadding
 import com.gft.crypto.domain.common.model.SignaturePadding
-import com.gft.crypto.domain.common.model.Transformation
 import com.gft.crypto.domain.common.model.Transformation.DataEncryption
 import com.gft.crypto.domain.common.model.Transformation.KeyWrapping
 import com.gft.crypto.domain.common.model.Transformation.MessageSigning
@@ -33,7 +32,6 @@ sealed class KeyStoreCompatibleMessageSigning(
     object SHA256_ECDSA : KeyStoreCompatibleMessageSigning(Algorithm.ECDSA, Digest.SHA_256, SignaturePadding.NONE)
     object SHA384_ECDSA : KeyStoreCompatibleMessageSigning(Algorithm.ECDSA, Digest.SHA_384, SignaturePadding.NONE)
     object SHA512_ECDSA : KeyStoreCompatibleMessageSigning(Algorithm.ECDSA, Digest.SHA_512, SignaturePadding.NONE)
-    
     companion object {
         fun getAll() = setOf(
             NONE_RSA, MD5_RSA, SHA1_RSA, SHA224_RSA, SHA256_RSA, SHA384_RSA, SHA512_RSA,
@@ -62,7 +60,7 @@ sealed class KeyStoreCompatibleDataEncryption(
     object RSA_ECB_OAEPWithSHA_256AndMGF1Padding : KeyStoreCompatibleDataEncryption(Algorithm.RSA, BlockMode.ECB, Digest.SHA_256, EncryptionPadding.OAEP_SHA_256_MGF1)
     object RSA_ECB_OAEPWithSHA_384AndMGF1Padding : KeyStoreCompatibleDataEncryption(Algorithm.RSA, BlockMode.ECB, Digest.SHA_384, EncryptionPadding.OAEP_SHA_384_MGF1)
     object RSA_ECB_OAEPWithSHA_512AndMGF1Padding : KeyStoreCompatibleDataEncryption(Algorithm.RSA, BlockMode.ECB, Digest.SHA_512, EncryptionPadding.OAEP_SHA_512_MGF1)
-    
+
     companion object {
         fun getAll() = setOf(
             AES_ECB_NoPadding, AES_ECB_PKCS7Padding,

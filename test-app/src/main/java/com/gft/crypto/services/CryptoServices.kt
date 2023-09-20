@@ -7,11 +7,14 @@ import com.gft.crypto.domain.keys.repositories.KeysRepository
 import com.gft.crypto.domain.keys.services.KeysFactory
 import com.gft.crypto.domain.keys.services.PublicKeyParser
 import com.gft.crypto.domain.pin.services.PinBlockGenerator
+import com.gft.crypto.domain.signing.services.SignatureVerifier
+import com.gft.crypto.domain.signing.services.Signer
 import com.gft.crypto.domain.wrapping.services.KeyWrapper
 import com.gft.crypto.framework.encryption.services.DefaultDataCipher
 import com.gft.crypto.framework.keys.repositories.OsBackedKeysRepository
 import com.gft.crypto.framework.keys.services.DefaultKeyPropertiesExtractor
 import com.gft.crypto.framework.keys.services.DefaultPublicKeyParser
+import com.gft.crypto.framework.signing.services.DefaultSigner
 import com.gft.crypto.framework.storage.services.EncryptedSharedPreferencesProvider
 import com.gft.crypto.framework.wrapping.services.DefaultKeyWrapper
 import java.security.KeyStore
@@ -27,6 +30,8 @@ object CryptoServices {
     lateinit var keysRepository: KeysRepository
     lateinit var keyWrapper: KeyWrapper
     lateinit var dataCipher: DataCipher
+    lateinit var signer: Signer
+    lateinit var signatureVerifier: SignatureVerifier
     lateinit var pinBlockGenerator: PinBlockGenerator
     lateinit var parser: PublicKeyParser
     val keysFactory: KeysFactory = KeysFactory()
@@ -50,6 +55,8 @@ object CryptoServices {
         sharedPreferencesProvider = EncryptedSharedPreferencesProvider(applicationContext, keysRepository)
         keyWrapper = DefaultKeyWrapper(keysRepository)
         dataCipher = DefaultDataCipher(keysRepository)
+        signer = DefaultSigner(keysRepository)
+        signatureVerifier = DefaultSigner(keysRepository)
         pinBlockGenerator = PinBlockGenerator(dataCipher)
         parser = DefaultPublicKeyParser()
     }

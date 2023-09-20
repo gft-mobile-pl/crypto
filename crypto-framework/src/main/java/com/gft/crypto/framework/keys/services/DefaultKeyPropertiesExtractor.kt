@@ -136,6 +136,7 @@ private fun Int.toKeyPurposes(): Set<KeyPurpose> {
 private fun String.toKeyAlgorithm() = when (this) {
     android.security.keystore.KeyProperties.KEY_ALGORITHM_AES -> Algorithm.AES
     android.security.keystore.KeyProperties.KEY_ALGORITHM_RSA -> Algorithm.RSA
+    android.security.keystore.KeyProperties.KEY_ALGORITHM_EC -> Algorithm.ECDSA
     else -> throw IllegalArgumentException("$this algorithm is not a supported.")
 }
 

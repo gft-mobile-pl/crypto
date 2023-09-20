@@ -1,6 +1,7 @@
 package com.gft.crypto
 
 import android.os.Bundle
+import android.util.Base64
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
@@ -32,13 +33,16 @@ import com.gft.crypto.services.CryptoServices.dataCipher
 import com.gft.crypto.services.CryptoServices.keyWrapper
 import com.gft.crypto.services.CryptoServices.keysFactory
 import com.gft.crypto.services.CryptoServices.keysRepository
+import com.gft.crypto.services.CryptoServices.signer
 import com.gft.crypto.services.CryptoServices.parser
 import com.gft.crypto.services.CryptoServices.pinBlockGenerator
+import com.gft.crypto.services.CryptoServices.signatureVerifier
 import com.gft.crypto.ui.theme.CryptolibraryTheme
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.crypto.SecretKey
 
 private val SharedPrefsKeyAlias = KeyAlias<Transformation.DataEncryption>("spkeyalias")
@@ -77,8 +81,8 @@ private val BiometricEncryptionKeyProperties = KeyProperties(
     supportedTransformation = KeyStoreCompatibleDataEncryption.RSA_ECB_OAEPPadding
 )
 
+@OptIn(DelicateCoroutinesApi::class, ExperimentalUnsignedTypes::class)
 class MainActivity : ComponentActivity() {
-    @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         CryptoServices.init(applicationContext)
 
@@ -298,6 +302,65 @@ class MainActivity : ComponentActivity() {
                         println("#Test ---------------------------------------------------------------------------")
                     }) {
                         Text(text = "Parse Public Key")
+                    }
+
+                    Button(onClick = {
+                        println("#Test ---------------------------------------------------------------------------")
+                        val testedTransformations = mutableSetOf<String>()
+                        KeyStoreCompatibleMessageSigning.getAll().forEach { keyStoreCompatibleMessageSigning ->
+                            val messageSigningAlias = KeyAlias<Transformation.MessageSigning>("messagesigningalias ${UUID.randomUUID()} ")
+                            val messageSigningProperties = KeyProperties(
+                                keySize = if (keyStoreCompatibleMessageSigning.algorithm == Algorithm.ECDSA) {
+                                    521
+                                } else {
+                                    2048
+                                },
+                                unlockPolicy = UnlockPolicy.NotRequired,
+                                userAuthenticationPolicy = UserAuthenticationPolicy.NotRequired,
+                                randomizationPolicy = RandomizationPolicy.Required,
+                                supportedTransformation = keyStoreCompatibleMessageSigning
+                            )
+                            println("Creating keys for: $messageSigningProperties")
+                            val canonicalForm = messageSigningProperties.supportedTransformation.canonicalTransformation
+                            println("Canonical form: $canonicalForm")
+                            testedTransformations.add(canonicalForm)
+                            keysRepository.createKey(messageSigningAlias, messageSigningProperties)
+                            val jsonToSign = "test".toByteArray(charset = Charsets.ISO_8859_1)
+                            val signature = signer.sign(messageSigningAlias, jsonToSign).perform()
+                            println("#Test signature base64 = ${Base64.encodeToString(signature, Base64.NO_WRAP)})")
+                            println(
+                                "#Test signature hex = ${
+                                    signature.asUByteArray().joinToString("") { it.toString(16).padStart(2, '0') }
+                                }"
+                            )
+                            val validity = signatureVerifier.verify(messageSigningAlias, jsonToSign, signature).perform()
+                            println("#Test validity = $validity")
+                            keysRepository.deleteKey(messageSigningAlias)
+                        }
+                        val expectedTransformations = setOf(
+                            "NONEwithRSA",
+                            "MD5withRSA",
+                            "SHA1withRSA",
+                            "SHA224withRSA",
+                            "SHA256withRSA",
+                            "SHA384withRSA",
+                            "SHA512withRSA",
+                            "SHA1withRSA/PSS",
+                            "SHA224withRSA/PSS",
+                            "SHA256withRSA/PSS",
+                            "SHA384withRSA/PSS",
+                            "SHA512withRSA/PSS",
+                            "NONEwithECDSA",
+                            "SHA1withECDSA",
+                            "SHA224withECDSA",
+                            "SHA256withECDSA",
+                            "SHA384withECDSA",
+                            "SHA512withECDSA"
+                        )
+                        println("All algorithms tested: ${testedTransformations.intersect(expectedTransformations) == expectedTransformations}")
+                        println("#Test ---------------------------------------------------------------------------")
+                    }) {
+                        Text(text = "Sign and verify")
                     }
                 }
             }
