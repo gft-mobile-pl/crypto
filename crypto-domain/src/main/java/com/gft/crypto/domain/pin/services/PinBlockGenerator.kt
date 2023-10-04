@@ -4,15 +4,17 @@ import com.gft.crypto.domain.common.model.SecureText
 import com.gft.crypto.domain.common.model.Transformation.DataEncryption
 import com.gft.crypto.domain.common.utils.xor
 import com.gft.crypto.domain.encryption.services.DataCipher
+import java.io.ByteArrayOutputStream
 import java.security.SecureRandom
 import javax.crypto.SecretKey
+import kotlin.math.max
 
 private const val PIN_BLOCK_ISO_VERSION_NUMBER = 0x4
-private const val PIN_BLOCK_PADDING_A = 0xA
+private const val PIN_BLOCK_PADDING_A: Byte = 0xA
 private const val PIN_BLOCK_START_RANDOM_VALUES_INDEX = 16
 private const val PAN_BLOCK_STANDARD_SIZE = 12
-private const val PAN_BLOCK_STANDARD_SIZE_VALUE = 0x0
-private const val PAN_BLOCK_PADDING_0 = 0x0
+private const val PAN_BLOCK_STANDARD_SIZE_ZERO_VALUE = 0x0
+private const val PAN_BLOCK_PADDING_0: Byte = 0x0
 private const val BLOCK_SIZE = 32
 
 class PinBlockGenerator(
@@ -27,62 +29,55 @@ class PinBlockGenerator(
         return dataCipher.encrypt(key, transformation, intermediateBlockB).perform().data
     }
 
-    private fun preparePinBlock(pin: SecureText): ByteArray {
-        val blockData = IntArray(BLOCK_SIZE).apply {
-            var index = 0
-            this[index] = PIN_BLOCK_ISO_VERSION_NUMBER
-            index++
-            this[index] = pin.size
-            index++
-            pin.text.forEach { digit ->
-                this[index] = digit.digitToInt()
-                index++
-            }
-            while (index < PIN_BLOCK_START_RANDOM_VALUES_INDEX) {
-                this[index] = PIN_BLOCK_PADDING_A
-                index++
-            }
-            val random = SecureRandom.getInstanceStrong()
-            val randomValues = ByteArray(BLOCK_SIZE - index)
-            random.nextBytes(randomValues)
-            randomValues.forEach { byte ->
-                this[index] = byte.toInt()
-                index++
-            }
-        }
-        return blockData.to4BitsArray()
-    }
-
-    private fun preparePanBlock(pan: SecureText): ByteArray {
-        val blockData = IntArray(BLOCK_SIZE)
+    private fun preparePinBlock(pin: SecureText) =
+        ByteArrayOutputStream(BLOCK_SIZE)
             .apply {
-                var index = 0
-                this[0] = when {
-                    pan.size < PAN_BLOCK_STANDARD_SIZE -> PAN_BLOCK_STANDARD_SIZE_VALUE
-                    else -> pan.size - PAN_BLOCK_STANDARD_SIZE
+                // 0. ISO4 Version Number
+                write(PIN_BLOCK_ISO_VERSION_NUMBER)
+                // 1. PIN Size
+                write(pin.size)
+                // 2-N, N < 14. PIN
+                pin.text.forEach { digit ->
+                    write(digit.digitToInt())
                 }
-                index++
-                while (index <= PAN_BLOCK_STANDARD_SIZE - pan.size) {
-                    this[index] = PAN_BLOCK_PADDING_0
-                    index++
-                }
-                pan.text.forEach { digit ->
-                    this[index] = digit.digitToInt()
-                    index++
-                }
-                while (index < BLOCK_SIZE) {
-                    this[index] = PAN_BLOCK_PADDING_0
-                    index++
-                }
+                // N-16. PIN padding (0xA)
+                write(ByteArray(PIN_BLOCK_START_RANDOM_VALUES_INDEX - size()) { PIN_BLOCK_PADDING_A })
+                // 16-32. Random bytes
+                write(generateRandomHexDigits(size = BLOCK_SIZE - size()))
             }
-        return blockData.to4BitsArray()
+            .toByteArray() // 32 hex digits, 0xF
+            .fromHexArrayToByteArray() // 16 hex numbers, 0xFF
+
+    private fun preparePanBlock(pan: SecureText) =
+        ByteArrayOutputStream(BLOCK_SIZE)
+            .apply {
+                // 0. PAN size. max(0, size - 12)
+                write(max(pan.size - PAN_BLOCK_STANDARD_SIZE, PAN_BLOCK_STANDARD_SIZE_ZERO_VALUE))
+                // 1-M. Leading PAN padding, if size < 12, 0x0
+                write(ByteArray(max(PAN_BLOCK_STANDARD_SIZE - pan.size, 0)) { PAN_BLOCK_PADDING_0 })
+                // M(usually 2)-N(usually 14). PAN token
+                pan.text.forEach { digit ->
+                    write(digit.digitToInt())
+                }
+                // N-32. Trailing PAN padding, 0x0
+                write(ByteArray(BLOCK_SIZE - size()) { PAN_BLOCK_PADDING_0 })
+            }
+            .toByteArray() // 32 hex digits, 0xF
+            .fromHexArrayToByteArray() // 16 hex numbers, 0xFF
+
+    private fun generateRandomHexDigits(size: Int): ByteArray {
+        val random = SecureRandom.getInstanceStrong()
+        return ByteArray(size) { random.nextInt(0xF).toByte() }
     }
 
-    private fun IntArray.to4BitsArray(): ByteArray {
+    private fun ByteArray.fromHexArrayToByteArray(): ByteArray {
         val result = ByteArray(size / 2)
 
         for ((destIndex, srcIndex) in (indices step 2).withIndex()) {
-            result[destIndex] = ((this[srcIndex] shl 4) or this[srcIndex + 1]).toByte()
+            val lhs = this[srcIndex].toUInt().shl(4) // 0xF => 0xF0
+            val rhs = this[srcIndex + 1].toUInt() // 0xF => 0x0F
+
+            result[destIndex] = (lhs or rhs).toByte() // 0xFF
             this[srcIndex] = 0
             this[srcIndex + 1] = 0
         }
