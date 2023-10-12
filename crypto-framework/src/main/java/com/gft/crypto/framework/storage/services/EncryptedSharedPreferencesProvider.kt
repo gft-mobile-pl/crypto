@@ -11,6 +11,7 @@ import com.gft.crypto.domain.keys.model.RandomizationPolicy
 import com.gft.crypto.domain.keys.model.UnlockPolicy
 import com.gft.crypto.domain.keys.model.UserAuthenticationPolicy
 import com.gft.crypto.domain.keys.repositories.KeysRepository
+import java.security.KeyStoreException
 
 private const val DEFAULT_AES_KEY_SIZE = 256
 
@@ -32,7 +33,7 @@ class EncryptedSharedPreferencesProvider(
         try {
             return createEncryptedSharedPreferences(applicationContext, fileName, masterKeyAlias)
         } catch (error: Throwable) {
-            if (recreateCorruptedSharedPreferences) applicationContext.deleteSharedPreferences(fileName)
+            if (recreateCorruptedSharedPreferences && error !is KeyStoreException) applicationContext.deleteSharedPreferences(fileName)
             else throw error
         }
         return createEncryptedSharedPreferences(applicationContext, fileName, masterKeyAlias)
