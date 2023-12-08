@@ -6,6 +6,7 @@ import com.gft.crypto.domain.encryption.services.DataCipher
 import com.gft.crypto.domain.keys.repositories.KeysRepository
 import com.gft.crypto.domain.keys.services.KeysFactory
 import com.gft.crypto.domain.keys.services.PublicKeyParser
+import com.gft.crypto.domain.pin.services.PinBlockDecoder
 import com.gft.crypto.domain.pin.services.PinBlockGenerator
 import com.gft.crypto.domain.signing.services.SignatureVerifier
 import com.gft.crypto.domain.signing.services.Signer
@@ -33,6 +34,7 @@ object CryptoServices {
     lateinit var signer: Signer
     lateinit var signatureVerifier: SignatureVerifier
     lateinit var pinBlockGenerator: PinBlockGenerator
+    lateinit var pinBlockDecoder: PinBlockDecoder
     lateinit var parser: PublicKeyParser
     val keysFactory: KeysFactory = KeysFactory()
 
@@ -59,5 +61,6 @@ object CryptoServices {
         signatureVerifier = DefaultSigner(keysRepository)
         pinBlockGenerator = PinBlockGenerator(dataCipher)
         parser = DefaultPublicKeyParser()
+        pinBlockDecoder = PinBlockDecoder(dataCipher)
     }
 }

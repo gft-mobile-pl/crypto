@@ -33,10 +33,11 @@ import com.gft.crypto.services.CryptoServices.dataCipher
 import com.gft.crypto.services.CryptoServices.keyWrapper
 import com.gft.crypto.services.CryptoServices.keysFactory
 import com.gft.crypto.services.CryptoServices.keysRepository
-import com.gft.crypto.services.CryptoServices.signer
 import com.gft.crypto.services.CryptoServices.parser
+import com.gft.crypto.services.CryptoServices.pinBlockDecoder
 import com.gft.crypto.services.CryptoServices.pinBlockGenerator
 import com.gft.crypto.services.CryptoServices.signatureVerifier
+import com.gft.crypto.services.CryptoServices.signer
 import com.gft.crypto.ui.theme.CryptolibraryTheme
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -276,9 +277,13 @@ class MainActivity : ComponentActivity() {
                         val pan = SecureText("432198765432109870".toCharArray())
                         val transformation = KeyStoreCompatibleDataEncryption.AES_ECB_NoPadding
                         val encryptionKey = keysFactory.generateKey(128, transformation).first() as SecretKey
+                        println("#Test encryptionKey = ${encryptionKey.encoded.joinToString(" ") { it.toString() }}")
                         val encipheredPinBlock = pinBlockGenerator.generate(encryptionKey, transformation, pin, pan)
-                        println("#Test encryptedPinBlock = ${String(encipheredPinBlock, Charsets.UTF_8)}")
-                        println("#Test encryptionKey = ${String(encryptionKey.encoded, Charsets.UTF_8)}")
+                        println("#Test pin = ${pin.text.joinToString(" ") { it.toString() }}")
+                        println("#Test encryptedPinBlock = ${encipheredPinBlock.joinToString(" ") { it.toString() }}")
+                        val decryptedPin = pinBlockDecoder.decode(encryptionKey, transformation, encipheredPinBlock, pan)
+                        println("#Test decrypted pin = ${decryptedPin.text.joinToString(" ") { it.toString() }}")
+                        println("#Test decrypted pin size = ${decryptedPin.size}")
                         println("#Test ---------------------------------------------------------------------------")
                     }) {
                         Text(text = "Generate Pin")
