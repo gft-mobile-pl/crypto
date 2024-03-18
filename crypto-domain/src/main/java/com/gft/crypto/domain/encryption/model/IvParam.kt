@@ -4,4 +4,8 @@ import java.io.Serializable
 
 class IvParam (
     val iv: ByteArray
-) : Serializable
+) : Serializable {
+    companion object {
+        private const val serialVersionUID : Long = 9162255791031369367
+    }
+}
