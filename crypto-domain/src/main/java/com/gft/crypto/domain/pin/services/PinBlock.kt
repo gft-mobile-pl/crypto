@@ -66,8 +66,8 @@ private fun ByteArray.fromHexArrayToByteArray(): ByteArray {
     val result = ByteArray(size / 2)
 
     for ((destIndex, srcIndex) in (indices step 2).withIndex()) {
-        val lhs = this[srcIndex].toUInt().shl(4) // 0xF => 0xF0
-        val rhs = this[srcIndex + 1].toUInt() // 0xF => 0x0F
+        val lhs = this[srcIndex].toInt().shl(4) // 0xF => 0xF0
+        val rhs = this[srcIndex + 1].toInt() // 0xF => 0x0F
 
         result[destIndex] = (lhs or rhs).toByte() // 0xFF
         this[srcIndex] = 0
@@ -81,8 +81,8 @@ private fun ByteArray.fromByteArrayToHexArray(): ByteArray {
     val result = ByteArray(size * 2)
 
     for (index in indices) {
-        result[index * 2] = (this[index].toUInt() shr 4).toByte() // 0xFF => 0xF0
-        result[index * 2 + 1] = (this[index].toUInt() and 0x0F.toUInt()).toByte() // 0xFF => 0x0F
+        result[index * 2] = ((this[index].toInt() shr 4) and 0x0F).toByte() // 0xFF => 0xF0
+        result[index * 2 + 1] = (this[index].toInt() and 0x0F).toByte() // 0xFF => 0x0F
     }
 
     return result
