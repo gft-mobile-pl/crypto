@@ -37,7 +37,7 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion '1.4.7'
+        kotlinCompilerExtensionVersion '1.5.10'
     }
     packagingOptions {
         resources {
@@ -47,8 +47,8 @@ android {
 }
 
 dependencies {
-    api project(':crypto-domain')
-    api project(':crypto-framework')
+    api project(':crypto-core')
+    api project(':crypto-android')
 
     implementation "androidx.security:security-crypto:1.0.0"
     implementation 'androidx.core:core-ktx:1.10.1'

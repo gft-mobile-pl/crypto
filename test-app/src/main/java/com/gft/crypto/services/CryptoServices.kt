@@ -2,15 +2,15 @@ package com.gft.crypto.services
 
 import android.content.Context
 import androidx.security.crypto.EncryptedSharedPreferences
-import com.gft.crypto.domain.encryption.services.DataCipher
-import com.gft.crypto.domain.keys.repositories.KeysRepository
-import com.gft.crypto.domain.keys.services.KeysFactory
-import com.gft.crypto.domain.keys.services.PublicKeyParser
-import com.gft.crypto.domain.pin.services.PinBlockDecoder
-import com.gft.crypto.domain.pin.services.PinBlockGenerator
-import com.gft.crypto.domain.signing.services.SignatureVerifier
-import com.gft.crypto.domain.signing.services.Signer
-import com.gft.crypto.domain.wrapping.services.KeyWrapper
+import com.gft.crypto.encryption.services.DataCipher
+import com.gft.crypto.keys.repositories.KeysRepository
+import com.gft.crypto.keys.services.KeysFactory
+import com.gft.crypto.keys.services.PublicKeyParser
+import com.gft.crypto.pin.services.PinBlockDecoder
+import com.gft.crypto.pin.services.PinBlockGenerator
+import com.gft.crypto.signing.services.SignatureVerifier
+import com.gft.crypto.signing.services.Signer
+import com.gft.crypto.wrapping.services.KeyWrapper
 import com.gft.crypto.framework.encryption.services.DefaultDataCipher
 import com.gft.crypto.framework.keys.repositories.OsBackedKeysRepository
 import com.gft.crypto.framework.keys.services.DefaultKeyPropertiesExtractor
