@@ -1,18 +1,13 @@
-package com.gft.crypto.framework.wrapping.services
+package com.gft.crypto.encryption.services
 
-import android.security.keystore.KeyProperties
-import com.gft.crypto.common.model.Algorithm
 import com.gft.crypto.common.model.BlockMode
 import com.gft.crypto.common.model.CryptographicOperation
 import com.gft.crypto.common.model.EncryptionPadding
-import com.gft.crypto.common.model.Transformation
+import com.gft.crypto.common.model.Transformation.DataEncryption
+import com.gft.crypto.encryption.model.EncryptedData
 import com.gft.crypto.encryption.model.IvParam
 import com.gft.crypto.keys.model.KeyAlias
-import com.gft.crypto.keys.model.KeyType
 import com.gft.crypto.keys.repositories.KeysRepository
-import com.gft.crypto.wrapping.model.WrappedKeyContainer
-import com.gft.crypto.wrapping.services.KeyWrapper
-import com.gft.crypto.framework.keys.utils.toNativeKeyAlgorithm
 import java.io.Serializable
 import java.security.Key
 import java.security.PrivateKey
@@ -28,69 +23,63 @@ import javax.crypto.spec.PSource
 private const val MGF1_DIGEST = "MGF1"
 private const val AUTH_TAG_LENGTH = 128
 
-class DefaultKeyWrapper(
+class DefaultDataCipher(
     private val keysRepository: KeysRepository
-) : KeyWrapper {
-    override fun wrap(alias: KeyAlias<Transformation.KeyWrapping>, keyToWrap: Key): CryptographicOperation<Cipher, WrappedKeyContainer> {
+) : DataCipher {
+    override fun encrypt(alias: KeyAlias<DataEncryption>, data: ByteArray): CryptographicOperation<Cipher, EncryptedData> {
         val keyContainer = keysRepository.getKey(alias)
             .first { keyContainer ->
                 keyContainer.key is PublicKey || keyContainer.key is SecretKey
             }
-        return wrapWithKey(keyContainer.key, keyContainer.properties.supportedTransformation, keyToWrap)
+        return encryptWithKey(keyContainer.key, keyContainer.properties.supportedTransformation, data)
     }
 
-    override fun wrap(key: SecretKey, transformation: Transformation.KeyWrapping, keyToWrap: Key) = wrapWithKey(key, transformation, keyToWrap)
+    override fun encrypt(key: SecretKey, transformation: DataEncryption, data: ByteArray): CryptographicOperation<Cipher, EncryptedData> =
+        encryptWithKey(key, transformation, data)
 
-    override fun wrap(key: PublicKey, transformation: Transformation.KeyWrapping, keyToWrap: Key) = wrapWithKey(key, transformation, keyToWrap)
+    override fun encrypt(key: PublicKey, transformation: DataEncryption, data: ByteArray): CryptographicOperation<Cipher, EncryptedData> =
+        encryptWithKey(key, transformation, data)
 
-    private fun wrapWithKey(key: Key, transformation: Transformation.KeyWrapping, keyToWrap: Key) = object :
-        CryptographicOperation<Cipher, WrappedKeyContainer> {
-        override val processor: Cipher = createCipher(key, transformation, Cipher.WRAP_MODE, null)
-        override fun perform(): WrappedKeyContainer {
-            val wrappedKeyBytes = processor.wrap(keyToWrap)
-            return WrappedKeyContainer(
-                wrappedKeyBytes = wrappedKeyBytes,
-                wrappedKeyAlgorithm = key.algorithm.toCanonicalAlgorithm(),
-                wrappedKeyType = KeyType.valueOf(keyToWrap),
-                wrappingAlgorithmParams = processor.iv?.let { iv -> IvParam(iv) }
+    private fun encryptWithKey(key: Key, transformation: DataEncryption, data: ByteArray) = object :
+        CryptographicOperation<Cipher, EncryptedData> {
+        override val processor: Cipher = createCipher(key, transformation, Cipher.ENCRYPT_MODE, null)
+
+        override fun perform(): EncryptedData {
+            val encryptedBytes = processor.doFinal(data)
+            return EncryptedData(
+                data = encryptedBytes,
+                algorithmParams = processor.iv?.let { iv -> IvParam(iv) }
             )
         }
     }
 
-    override fun unwrap(alias: KeyAlias<Transformation.KeyWrapping>, wrappedKeyData: WrappedKeyContainer): CryptographicOperation<Cipher, Key> {
+    override fun decrypt(alias: KeyAlias<DataEncryption>, encryptedData: EncryptedData): CryptographicOperation<Cipher, ByteArray> {
         val keyContainer = keysRepository.getKey(alias)
             .first { keyContainer ->
                 keyContainer.key is PrivateKey || keyContainer.key is SecretKey
             }
-        return unwrapWithKey(keyContainer.key, keyContainer.properties.supportedTransformation, wrappedKeyData)
+        return decryptWithKey(keyContainer.key, keyContainer.properties.supportedTransformation, encryptedData)
     }
 
-    override fun unwrap(key: SecretKey, transformation: Transformation.KeyWrapping, wrappedKeyData: WrappedKeyContainer) =
-        unwrapWithKey(key, transformation, wrappedKeyData)
+    override fun decrypt(key: SecretKey, transformation: DataEncryption, encryptedData: EncryptedData): CryptographicOperation<Cipher, ByteArray> =
+        decryptWithKey(key, transformation, encryptedData)
 
-    override fun unwrap(key: PrivateKey, transformation: Transformation.KeyWrapping, wrappedKeyData: WrappedKeyContainer) =
-        unwrapWithKey(key, transformation, wrappedKeyData)
+    override fun decrypt(key: PrivateKey, transformation: DataEncryption, encryptedData: EncryptedData): CryptographicOperation<Cipher, ByteArray> =
+        decryptWithKey(key, transformation, encryptedData)
 
-    private fun unwrapWithKey(
-        key: Key,
-        transformation: Transformation.KeyWrapping,
-        wrappedKeyData: WrappedKeyContainer
-    ) = object : CryptographicOperation<Cipher, Key> {
+    private fun decryptWithKey(key: Key, transformation: DataEncryption, encryptedData: EncryptedData) = object :
+        CryptographicOperation<Cipher, ByteArray> {
         override val processor: Cipher = createCipher(
             key = key,
             transformation = transformation,
-            mode = Cipher.UNWRAP_MODE,
-            params = wrappedKeyData.wrappingAlgorithmParams
+            mode = Cipher.DECRYPT_MODE,
+            params = encryptedData.algorithmParams
         )
 
-        override fun perform(): Key = processor.unwrap(
-            wrappedKeyData.wrappedKeyBytes,
-            wrappedKeyData.wrappedKeyAlgorithm.toNativeKeyAlgorithm(),
-            wrappedKeyData.wrappedKeyType.toCipherType()
-        )
+        override fun perform(): ByteArray = processor.doFinal(encryptedData.data)
     }
 
-    private fun createCipher(key: Key, transformation: Transformation.KeyWrapping, mode: Int, params: Serializable?): Cipher {
+    private fun createCipher(key: Key, transformation: DataEncryption, mode: Int, params: Serializable?): Cipher {
         val cipher = Cipher.getInstance(transformation.canonicalTransformation)
             .apply {
                 val parameterSpec = when (params) {
@@ -129,9 +118,4 @@ class DefaultKeyWrapper(
             else -> cipher
         }
     }
-}
-
-fun String.toCanonicalAlgorithm() = when (this) {
-    KeyProperties.KEY_ALGORITHM_EC -> Algorithm.ECDSA
-    else -> Algorithm.valueOf(this)
 }

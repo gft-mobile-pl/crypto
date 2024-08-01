@@ -1,4 +1,4 @@
-package com.gft.crypto.framework.keys.utils
+package com.gft.crypto.keys.utils
 
 import android.annotation.SuppressLint
 import android.os.Build

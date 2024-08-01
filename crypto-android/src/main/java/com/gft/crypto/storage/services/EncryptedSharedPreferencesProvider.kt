@@ -1,4 +1,4 @@
-package com.gft.crypto.framework.storage.services
+package com.gft.crypto.storage.services
 
 import android.content.Context
 import android.content.SharedPreferences

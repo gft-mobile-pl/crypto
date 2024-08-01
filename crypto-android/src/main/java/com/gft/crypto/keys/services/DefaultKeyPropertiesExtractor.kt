@@ -1,4 +1,4 @@
-package com.gft.crypto.framework.keys.services
+package com.gft.crypto.keys.services
 
 import android.security.keystore.KeyInfo
 import com.gft.crypto.common.model.Algorithm
@@ -12,7 +12,6 @@ import com.gft.crypto.keys.model.KeyPurpose
 import com.gft.crypto.keys.model.RandomizationPolicy
 import com.gft.crypto.keys.model.UnlockPolicy
 import com.gft.crypto.keys.model.UserAuthenticationPolicy
-import com.gft.crypto.keys.services.KeyPropertiesExtractor
 import java.security.Key
 import java.security.KeyFactory
 import java.security.KeyStore

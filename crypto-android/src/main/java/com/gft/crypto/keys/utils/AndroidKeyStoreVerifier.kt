@@ -1,4 +1,4 @@
-package com.gft.crypto.framework.keys.utils
+package com.gft.crypto.keys.utils
 
 import java.security.KeyStore
 

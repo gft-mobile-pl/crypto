@@ -1,8 +1,7 @@
-package com.gft.crypto.framework.keys.services
+package com.gft.crypto.keys.services
 
 import com.gft.crypto.common.model.Algorithm
-import com.gft.crypto.keys.services.PublicKeyParser
-import com.gft.crypto.framework.keys.utils.toNativeKeyAlgorithm
+import com.gft.crypto.keys.utils.toNativeKeyAlgorithm
 import java.security.KeyFactory
 import java.security.PublicKey
 import java.security.spec.X509EncodedKeySpec

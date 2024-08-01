@@ -11,13 +11,13 @@ import com.gft.crypto.pin.services.PinBlockGenerator
 import com.gft.crypto.signing.services.SignatureVerifier
 import com.gft.crypto.signing.services.Signer
 import com.gft.crypto.wrapping.services.KeyWrapper
-import com.gft.crypto.framework.encryption.services.DefaultDataCipher
-import com.gft.crypto.framework.keys.repositories.OsBackedKeysRepository
-import com.gft.crypto.framework.keys.services.DefaultKeyPropertiesExtractor
-import com.gft.crypto.framework.keys.services.DefaultPublicKeyParser
-import com.gft.crypto.framework.signing.services.DefaultSigner
-import com.gft.crypto.framework.storage.services.EncryptedSharedPreferencesProvider
-import com.gft.crypto.framework.wrapping.services.DefaultKeyWrapper
+import com.gft.crypto.encryption.services.DefaultDataCipher
+import com.gft.crypto.keys.repositories.OsBackedKeysRepository
+import com.gft.crypto.keys.services.DefaultKeyPropertiesExtractor
+import com.gft.crypto.keys.services.DefaultPublicKeyParser
+import com.gft.crypto.signing.services.DefaultSigner
+import com.gft.crypto.storage.services.EncryptedSharedPreferencesProvider
+import com.gft.crypto.wrapping.services.DefaultKeyWrapper
 import java.security.KeyStore
 
 object CryptoServices {

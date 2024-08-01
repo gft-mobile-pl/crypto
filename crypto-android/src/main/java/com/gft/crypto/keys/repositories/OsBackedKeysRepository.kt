@@ -1,4 +1,4 @@
-package com.gft.crypto.framework.keys.repositories
+package com.gft.crypto.keys.repositories
 
 import android.annotation.SuppressLint
 import android.content.SharedPreferences
@@ -15,11 +15,10 @@ import com.gft.crypto.keys.model.KeyStoreCompatible
 import com.gft.crypto.keys.model.RandomizationPolicy
 import com.gft.crypto.keys.model.UnlockPolicy
 import com.gft.crypto.keys.model.UserAuthenticationPolicy
-import com.gft.crypto.keys.repositories.KeysRepository
 import com.gft.crypto.keys.services.KeyPropertiesExtractor
-import com.gft.crypto.framework.keys.utils.assertIsAndroidKeyStore
-import com.gft.crypto.framework.keys.utils.toKeyGenParameterSpec
-import com.gft.crypto.framework.keys.utils.toNativeKeyAlgorithm
+import com.gft.crypto.keys.utils.assertIsAndroidKeyStore
+import com.gft.crypto.keys.utils.toKeyGenParameterSpec
+import com.gft.crypto.keys.utils.toNativeKeyAlgorithm
 import java.security.KeyPairGenerator
 import java.security.KeyStore
 import javax.crypto.KeyGenerator

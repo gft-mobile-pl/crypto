@@ -1,4 +1,4 @@
-package com.gft.crypto.framework.signing.services
+package com.gft.crypto.signing.services
 
 import com.gft.crypto.common.model.CryptographicOperation
 import com.gft.crypto.common.model.Transformation
@@ -7,8 +7,6 @@ import com.gft.crypto.keys.repositories.KeysRepository
 import com.gft.crypto.signing.model.SignatureVerificationResult
 import com.gft.crypto.signing.model.SignatureVerificationResult.NOT_VALID
 import com.gft.crypto.signing.model.SignatureVerificationResult.VALID
-import com.gft.crypto.signing.services.SignatureVerifier
-import com.gft.crypto.signing.services.Signer
 import java.security.PrivateKey
 import java.security.PublicKey
 import java.security.Signature
