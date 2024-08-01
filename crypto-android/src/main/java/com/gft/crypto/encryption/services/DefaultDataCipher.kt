@@ -82,13 +82,18 @@ class DefaultDataCipher(
     private fun createCipher(key: Key, transformation: DataEncryption, mode: Int, params: Serializable?): Cipher {
         val cipher = Cipher.getInstance(transformation.canonicalTransformation)
             .apply {
+                @Suppress("DEPRECATION")
                 val parameterSpec = when (params) {
                     is IvParam -> when (transformation.blockMode) {
                         BlockMode.GCM -> GCMParameterSpec(AUTH_TAG_LENGTH, params.iv)
                         BlockMode.CBC, BlockMode.CTR -> IvParameterSpec(params.iv)
                         else -> throw IllegalArgumentException("Using IV with ${transformation.blockMode} is not supported.")
                     }
-
+                    is com.gft.crypto.domain.encryption.model.IvParam -> when (transformation.blockMode) {
+                        BlockMode.GCM -> GCMParameterSpec(AUTH_TAG_LENGTH, params.iv)
+                        BlockMode.CBC, BlockMode.CTR -> IvParameterSpec(params.iv)
+                        else -> throw IllegalArgumentException("Using IV with ${transformation.blockMode} is not supported.")
+                    }
                     else -> null
                 }
                 if (parameterSpec != null) init(mode, key, parameterSpec)

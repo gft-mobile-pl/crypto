@@ -12,7 +12,7 @@ java {
 }
 
 mavenPublishing {
-    coordinates(project.property("libraryGroupId") as String, "crypto-core", project.property("libraryVersion") as String)
+    coordinates(project.property("libraryGroupId") as String, "crypto-core-compatibility", project.property("libraryVersion") as String)
 
     pom {
         name.set(project.property("libraryNamePrefix") as String + " Core")

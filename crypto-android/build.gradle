@@ -75,6 +75,8 @@ tasks.matching { task ->
 
 dependencies {
     api project(':crypto-core')
+    implementation project(':crypto-core-compatibility')
+
     implementation "androidx.security:security-crypto:1.0.0"
     implementation 'androidx.core:core-ktx:1.10.1'
     implementation 'androidx.appcompat:appcompat:1.6.1'

@@ -15,4 +15,5 @@ dependencyResolutionManagement {
 rootProject.name = "crypto-library"
 include ':test-app'
 include ':crypto-core'
+include ':crypto-core-compatibility'
 include ':crypto-android'
