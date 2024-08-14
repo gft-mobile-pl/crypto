@@ -112,7 +112,7 @@ internal fun com.gft.crypto.keys.model.KeyProperties<*>.toKeyGenParameterSpec(al
         when (val authenticationPolicy = userAuthenticationPolicy) {
             is UserAuthenticationPolicy.Required -> {
                 if (authenticationPolicy.timeout <= Duration.ZERO) {
-                    throw IllegalArgumentException("timeout value of UserAuthenticationPolicy.Required should be greater than 0.")
+                    throw IllegalArgumentException("Timeout value of UserAuthenticationPolicy.Required should be greater than 0.")
                 }
                 setUserAuthenticationRequired(true)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {

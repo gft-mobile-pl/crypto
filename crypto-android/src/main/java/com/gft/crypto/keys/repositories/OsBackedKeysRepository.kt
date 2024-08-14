@@ -8,6 +8,8 @@ import com.gft.crypto.common.model.Digest
 import com.gft.crypto.common.model.EncryptionPadding
 import com.gft.crypto.common.model.SignaturePadding
 import com.gft.crypto.common.model.Transformation
+import com.gft.crypto.keys.model.MissingKeyException
+import com.gft.crypto.keys.model.UnsupportedKeyException
 import com.gft.crypto.keys.model.KeyAlias
 import com.gft.crypto.keys.model.KeyContainer
 import com.gft.crypto.keys.model.KeyProperties
@@ -19,9 +21,11 @@ import com.gft.crypto.keys.services.KeyPropertiesExtractor
 import com.gft.crypto.keys.utils.assertIsAndroidKeyStore
 import com.gft.crypto.keys.utils.toKeyGenParameterSpec
 import com.gft.crypto.keys.utils.toNativeKeyAlgorithm
+import java.security.GeneralSecurityException
 import java.security.KeyPairGenerator
 import java.security.KeyStore
 import javax.crypto.KeyGenerator
+import kotlin.jvm.Throws
 
 private const val ALIAS_TOKEN = "_alias"
 private const val ALGORITHM_TOKEN = "_algorithm"
@@ -114,9 +118,10 @@ open class OsBackedKeysRepository(
     }
 
     @Suppress("UNCHECKED_CAST")
+    @Throws(GeneralSecurityException::class)
     override fun <T : Transformation> getKey(alias: KeyAlias<T>): Set<KeyContainer<T>> {
         if (!keyStore.containsAlias(alias.alias)) {
-            throw IllegalArgumentException("There is not key with alias $alias registered in the repository.")
+            throw MissingKeyException(alias)
         }
 
         return when {
@@ -154,7 +159,7 @@ open class OsBackedKeysRepository(
                 )
             }
 
-            else -> throw IllegalStateException("Not supported key stored with $alias alias.")
+            else -> throw UnsupportedKeyException(alias)
         }
     }
 
